@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abrechnung</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#C84828">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Abrechnung">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-height: 100vh; }
+
+/* ── Shared ── */
+.btn {
+  padding: 7px 16px; border-radius: 6px; border: none; cursor: pointer;
+  font-family: Arial, sans-serif; font-size: 11px; font-weight: bold;
+  letter-spacing: .06em; text-transform: uppercase; transition: all .15s; white-space: nowrap;
+}
+.btn-primary { background: #C84828; color: #fff; }
+.btn-primary:hover { background: #A83818; }
+.btn-ghost { background: #E4DDD5; color: #555; }
+.btn-ghost:hover { background: #D5C9BC; }
+.btn-green { background: #E8F5EC; color: #2A6A3A; }
+.btn-green:hover { background: #D5EDDB; }
+.btn-red { background: #FAE9E7; color: #882A20; }
+.btn-red:hover { background: #F5D5D1; }
+.btn-sm { padding: 5px 12px; font-size: 10px; }
+.sec-label {
+  font-family: Arial, sans-serif; font-size: 8px; font-weight: bold;
+  letter-spacing: .14em; text-transform: uppercase; color: #BBB; margin: 24px 0 8px;
+}
+
+/* ══════════════════════════════════════
+   HOME VIEW
+══════════════════════════════════════ */
+#home-view { max-width: 760px; margin: 0 auto; padding: 40px 20px 80px; }
+
+.home-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 32px; gap: 12px; flex-wrap: wrap;
+}
+.home-title {
+  font-family: 'Georgia', serif; font-size: 36px; font-weight: normal; line-height: 1;
+}
+.home-subtitle {
+  font-family: Arial, sans-serif; font-size: 10px; color: #AAA;
+  letter-spacing: .12em; text-transform: uppercase; margin-top: 5px;
+}
+
+/* Trip cards */
+.trip-grid { display: flex; flex-direction: column; gap: 10px; }
+.trip-card {
+  background: #fff; border-radius: 10px; border: 1px solid #E2DAD0;
+  padding: 18px 20px; cursor: pointer; transition: box-shadow .15s, transform .1s;
+  display: flex; align-items: center; gap: 16px;
+}
+.trip-card:hover { box-shadow: 0 3px 16px rgba(0,0,0,.09); transform: translateY(-1px); }
+.trip-card-dot {
+  width: 10px; height: 10px; border-radius: 50%; background: #C84828; flex-shrink: 0; margin-top: 2px;
+}
+.trip-card-body { flex: 1; min-width: 0; }
+.trip-card-name {
+  font-family: 'Georgia', serif; font-size: 18px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.trip-card-meta {
+  font-family: Arial, sans-serif; font-size: 11px; color: #AAA; margin-top: 4px;
+}
+.trip-card-arrow { color: #CCC; font-size: 13px; flex-shrink: 0; }
+
+.trip-empty {
+  font-family: Arial, sans-serif; font-size: 14px; color: #BBB;
+  padding: 40px 0; text-align: center;
+}
+
+/* New trip form */
+.new-trip-form {
+  background: #fff; border-radius: 10px; border: 2px dashed #D5C9BC;
+  padding: 20px; margin-top: 10px; display: none;
+}
+.new-trip-form.open { display: block; }
+.new-trip-inputs { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+.new-trip-input {
+  border: 1px solid #E0D8CE; border-radius: 6px; padding: 9px 12px;
+  font-size: 13px; font-family: Arial, sans-serif; outline: none; color: #333;
+  background: #fff; transition: border-color .12s; flex: 1; min-width: 140px;
+}
+.new-trip-input:focus { border-color: #C84828; }
+
+/* Home branding */
+.home-brand {
+  margin-top: 48px; padding-top: 20px; border-top: 1px solid #E2DAD0;
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+/* ══════════════════════════════════════
+   TRIP VIEW
+══════════════════════════════════════ */
+#trip-view { display: none; max-width: 860px; margin: 0 auto; padding: 32px 20px 80px; }
+
+.trip-nav {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 24px; flex-wrap: wrap;
+}
+.back-btn {
+  font-family: Arial, sans-serif; font-size: 11px; color: #C84828;
+  background: none; border: none; cursor: pointer; padding: 4px 0;
+  letter-spacing: .04em; font-weight: bold; flex-shrink: 0;
+}
+.back-btn:hover { text-decoration: underline; }
+.trip-nav-spacer { flex: 1; }
+
+.top-bar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; gap: 12px; flex-wrap: wrap; }
+.title-block { flex: 1; min-width: 0; }
+.trip-title { font-family: 'Georgia', serif; font-size: 28px; font-weight: normal; outline: none; border-bottom: 1px solid transparent; transition: border-color .15s; min-height: 1em; }
+.trip-title:focus { border-bottom-color: #C4B8A8; }
+.trip-title:empty::before { content: attr(data-placeholder); color: #C4B8A8; }
+.subtitle-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.trip-subtitle { font-family: Arial, sans-serif; font-size: 10px; color: #999; letter-spacing: .12em; text-transform: uppercase; outline: none; border-bottom: 1px solid transparent; transition: border-color .15s; }
+.trip-subtitle:focus { border-bottom-color: #C4B8A8; }
+.trip-subtitle:empty::before { content: 'Untertitel'; color: #C4B8A8; }
+.currency-select { font-family: Arial, sans-serif; font-size: 10px; color: #999; letter-spacing: .08em; border: none; background: transparent; cursor: pointer; outline: none; }
+.action-bar { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+.persons-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.person-chip { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #DDD6CC; border-radius: 20px; padding: 5px 14px; font-family: Arial, sans-serif; font-size: 12px; color: #333; }
+.chip-rm { cursor: pointer; color: #CCC; font-size: 15px; line-height: 1; transition: color .1s; }
+.chip-rm:hover { color: #882A20; }
+.add-person-input { border: 1px dashed #CCC; border-radius: 20px; padding: 5px 14px; font-size: 12px; font-family: Arial, sans-serif; outline: none; width: 160px; background: transparent; color: #555; transition: border-color .15s, background .15s; }
+.add-person-input:focus { border-color: #C84828; background: #fff; }
+.add-person-input::placeholder { color: #CCC; }
+
+.expense-card { background: #fff; border-radius: 8px; margin-bottom: 8px; overflow: hidden; border: 1px solid #E2DAD0; transition: box-shadow .15s; }
+.expense-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,.07); }
+.expense-card.settled { border-left: 4px solid #2A6A3A; }
+.expense-card.open    { border-left: 4px solid #882A20; }
+.expense-card.unknown { border-left: 4px solid #B8930A; }
+.exp-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer; user-select: none; transition: background .1s; }
+.exp-header:hover { background: #FDFCFA; }
+.exp-title-block { flex: 1; min-width: 0; }
+.exp-title { font-family: 'Georgia', serif; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.exp-sub { font-family: Arial, sans-serif; font-size: 10px; color: #AAA; margin-top: 2px; }
+.exp-amount { font-family: Arial, sans-serif; font-size: 13px; font-weight: bold; color: #333; white-space: nowrap; flex-shrink: 0; }
+.status-badge { font-family: Arial, sans-serif; font-size: 9px; font-weight: bold; letter-spacing: .06em; padding: 3px 9px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
+.s-settled { background: #E8F5EC; color: #2A6A3A; }
+.s-open    { background: #FAE9E7; color: #882A20; }
+.s-unknown { background: #FAF3E0; color: #7A5C10; }
+.exp-chevron { color: #CCC; font-size: 9px; flex-shrink: 0; transition: transform .2s; }
+.exp-chevron.open { transform: rotate(90deg); }
+.exp-body { display: none; border-top: 1px solid #F0EAE2; padding: 14px 16px; }
+.exp-body.open { display: block; }
+.detail-grid { display: grid; grid-template-columns: 110px 1fr; gap: 5px 10px; margin-bottom: 14px; }
+.dlbl { font-family: Arial, sans-serif; font-size: 9px; font-weight: bold; letter-spacing: .08em; text-transform: uppercase; color: #BBB; padding-top: 1px; }
+.dval { font-family: Arial, sans-serif; font-size: 12px; color: #444; }
+.pay-table { width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px; }
+.pay-table th { text-align: left; font-size: 8px; text-transform: uppercase; letter-spacing: .1em; color: #CCC; font-weight: bold; padding: 0 0 5px; border-bottom: 1px solid #F0EAE2; }
+.pay-table th.r { text-align: right; }
+.pay-table td { padding: 6px 0; border-bottom: 1px solid #F8F4F0; vertical-align: middle; }
+.pay-table tr:last-child td { border-bottom: none; }
+.td-r { text-align: right; }
+.payer-tag { display: inline-block; font-size: 9px; background: #F5F0EB; color: #AAA; padding: 1px 6px; border-radius: 4px; margin-left: 5px; }
+.pay-input { width: 80px; border: 1px solid #E0D8CE; border-radius: 5px; padding: 3px 7px; font-size: 12px; font-family: Arial, sans-serif; text-align: right; outline: none; color: #333; transition: border-color .12s; }
+.pay-input:focus { border-color: #C84828; }
+.exp-actions { display: flex; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #F0EAE2; flex-wrap: wrap; }
+.settle-card { background: #fff; border-radius: 8px; padding: 16px 18px; border: 1px solid #E2DAD0; margin-bottom: 8px; }
+.settle-title { font-family: 'Georgia', serif; font-size: 17px; margin-bottom: 12px; }
+.bal-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #F8F4F0; font-family: Arial, sans-serif; font-size: 12px; }
+.bal-row:last-child { border-bottom: none; }
+.debt-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #F8F4F0; font-family: Arial, sans-serif; font-size: 13px; }
+.debt-row:last-child { border-bottom: none; }
+.file-bar { display: flex; align-items: center; gap: 6px; margin-top: 28px; padding-top: 18px; border-top: 1px solid #E2DAD0; flex-wrap: wrap; }
+.file-status { font-family: Arial, sans-serif; font-size: 10px; color: #BBB; flex: 1; min-width: 140px; }
+.file-btn { background: none; border: 1px solid #E0D8CE; border-radius: 6px; padding: 5px 11px; font-size: 10px; font-family: Arial, sans-serif; color: #888; cursor: pointer; transition: all .15s; white-space: nowrap; }
+.file-btn:hover { border-color: #C84828; color: #C84828; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.open { display: flex; }
+.modal { background: #fff; border-radius: 12px; padding: 26px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,.2); }
+.modal-title { font-family: 'Georgia', serif; font-size: 22px; margin-bottom: 20px; }
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-family: Arial, sans-serif; font-size: 9px; font-weight: bold; letter-spacing: .1em; text-transform: uppercase; color: #AAA; margin-bottom: 5px; }
+.form-input, .form-select { width: 100%; border: 1px solid #E0D8CE; border-radius: 6px; padding: 9px 12px; font-size: 13px; font-family: Arial, sans-serif; outline: none; color: #333; background: #fff; transition: border-color .12s; }
+.form-input:focus, .form-select:focus { border-color: #C84828; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.part-checks { display: flex; flex-wrap: wrap; gap: 6px; }
+.part-chip { padding: 5px 12px; border: 1px solid #E5DDD5; border-radius: 16px; font-family: Arial, sans-serif; font-size: 12px; color: #555; cursor: pointer; user-select: none; transition: all .12s; }
+.part-chip.active { background: #E8F5EC; border-color: #2A6A3A; color: #2A6A3A; }
+.settled-label { display: flex; align-items: center; gap: 7px; font-family: Arial, sans-serif; font-size: 12px; color: #444; cursor: pointer; }
+.settled-label input { accent-color: #2A6A3A; cursor: pointer; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+.manu-brand { margin-top: 36px; padding-top: 20px; border-top: 1px solid #E2DAD0; display: flex; flex-direction: column; gap: 4px; }
+.manu-label { font-family: Arial, sans-serif; font-size: 8px; font-weight: bold; letter-spacing: .14em; text-transform: uppercase; color: #CCC; }
+.manu-lockup { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.manu-logo { font-family: Arial, sans-serif; font-size: 22px; font-weight: bold; color: #1A1A1A; letter-spacing: -.02em; line-height: 1; }
+.manu-div { color: #DDD; font-family: Arial, sans-serif; font-size: 16px; }
+.manu-slogan { font-family: 'Georgia', serif; font-style: italic; font-size: 15px; color: #666; }
+.phase-section { margin-bottom: 4px; }
+.phase-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #E8E2DA; border-radius: 8px; cursor: pointer; user-select: none; transition: background .15s; }
+.phase-header:hover { background: #DED8CF; }
+.phase-chev { font-size: 9px; color: #888; transition: transform .2s; flex-shrink: 0; }
+.phase-chev.open { transform: rotate(90deg); }
+.phase-name { font-family: Arial, sans-serif; font-size: 11px; font-weight: bold; letter-spacing: .06em; text-transform: uppercase; color: #555; flex: 1; }
+.phase-meta { font-family: Arial, sans-serif; font-size: 10px; color: #AAA; }
+.phase-add-btn { margin-left: 4px; flex-shrink: 0; }
+.phase-body { display: none; padding-top: 6px; }
+.phase-body.open { display: block; }
+.phase-empty { font-family: Arial, sans-serif; font-size: 12px; color: #CCC; padding: 10px 2px 4px; }
+.pay-site-badge { font-family: Arial, sans-serif; font-size: 9px; color: #7A5C10; background: #FAF3E0; border: 1px solid #E8D8A0; border-radius: 4px; padding: 1px 6px; margin-left: 6px; white-space: nowrap; }
+.phase-toggle { display: flex; gap: 6px; }
+.phase-toggle-btn { flex: 1; padding: 8px 10px; border: 1px solid #E0D8CE; border-radius: 6px; font-family: Arial, sans-serif; font-size: 11px; font-weight: bold; color: #888; background: #fff; cursor: pointer; text-align: center; transition: all .12s; user-select: none; }
+.phase-toggle-btn.active { background: #1A1A1A; border-color: #1A1A1A; color: #fff; }
+.payonsite-group { margin-top: -6px; padding: 10px 12px; background: #FAF3E0; border: 1px solid #E8D8A0; border-radius: 6px; font-family: Arial, sans-serif; font-size: 12px; color: #7A5C10; }
+.payonsite-group label { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+.payonsite-group input { accent-color: #B8930A; }
+
+/* Delete trip button */
+.delete-trip-btn {
+  background: none; border: none; font-family: Arial, sans-serif; font-size: 10px;
+  color: #CCC; cursor: pointer; padding: 5px 0; margin-top: 8px;
+  letter-spacing: .04em;
+}
+.delete-trip-btn:hover { color: #882A20; }
+
+/* ── Mobile ── */
+@media (max-width: 620px) {
+  #home-view { padding: 24px 14px 60px; }
+  .home-title { font-size: 28px; }
+  #trip-view { padding: 14px 10px 60px; }
+  .trip-title { font-size: 22px; }
+  .top-bar { gap: 8px; }
+  .action-bar { gap: 4px; }
+  .btn-sm { padding: 6px 10px; }
+  .form-row { grid-template-columns: 1fr; gap: 0; }
+  .modal { padding: 18px 14px; }
+  .modal-actions { flex-wrap: wrap; }
+  .exp-title { white-space: normal; line-height: 1.3; }
+  .exp-header { padding: 10px 12px; gap: 8px; flex-wrap: wrap; }
+  .exp-amount { font-size: 12px; }
+  .status-badge { font-size: 8px; padding: 2px 7px; }
+  .exp-body { padding: 10px 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .expense-card { overflow: visible; }
+  .pay-table { font-size: 11px; min-width: 320px; }
+  .pay-table th, .pay-table td { padding: 5px 2px; }
+  .pay-input { width: 65px; font-size: 11px; padding: 3px 5px; }
+  .debt-row { flex-wrap: wrap; gap: 4px 8px; }
+  .settle-card { padding: 12px 13px; }
+  .phase-meta { display: none; }
+  .phase-header { padding: 8px 10px; gap: 8px; }
+  .add-person-input { width: 130px; }
+  .file-btn { font-size: 9px; padding: 4px 8px; }
+  .file-status { font-size: 9px; }
+  .manu-logo { font-size: 18px; }
+  .manu-slogan { font-size: 13px; }
+  .trip-card { padding: 14px 16px; }
+  .trip-card-name { font-size: 16px; }
+  .new-trip-inputs { flex-direction: column; }
+}
+
+@media print {
+  body { background: #fff; }
+  #home-view { display: none !important; }
+  .trip-nav, .action-bar, .exp-actions, .phase-add-btn, .add-person-input,
+  .chip-rm, .exp-chevron, .file-bar, .pay-input { display: none !important; }
+  .exp-body { display: block !important; }
+  .phase-body { display: block !important; }
+  .expense-card { break-inside: avoid; margin-bottom: 14px; box-shadow: none; }
+  .modal-overlay { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════ HOME VIEW ════════════════ -->
+<div id="home-view">
+  <div class="home-header">
+    <div>
+      <div class="home-title">Abrechnung</div>
+      <div class="home-subtitle">Reisekostenabrechnung · MANUventura</div>
+    </div>
+    <button class="btn btn-primary" id="home-new-btn">+ Neue Reise</button>
+  </div>
+
+  <div class="new-trip-form" id="new-trip-form">
+    <div class="new-trip-inputs">
+      <input class="new-trip-input" id="new-trip-name" placeholder="Reisetitel, z.B. Sulawesi 26" maxlength="60">
+      <input class="new-trip-input" id="new-trip-sub" placeholder="Untertitel, z.B. Oktober 2026" maxlength="60" style="max-width:220px">
+      <button class="btn btn-primary btn-sm" id="new-trip-create">Erstellen</button>
+      <button class="btn btn-ghost btn-sm" id="new-trip-cancel">Abbrechen</button>
+    </div>
+  </div>
+
+  <div class="sec-label" style="margin-top:28px">Meine Reisen</div>
+  <div class="trip-grid" id="trip-grid"></div>
+
+  <div class="home-brand">
+    <div class="manu-label">unterwegs mit</div>
+    <div class="manu-lockup">
+      <span class="manu-logo">MANUventura</span>
+      <span class="manu-div">|</span>
+      <em class="manu-slogan">wir fliehen – aber mit Stil</em>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ TRIP VIEW ════════════════ -->
+<div id="trip-view">
+  <div class="trip-nav">
+    <button class="back-btn" id="back-btn">← Alle Reisen</button>
+    <span class="trip-nav-spacer"></span>
+    <button class="btn btn-ghost btn-sm" id="print-btn">🖨 Drucken / PDF</button>
+    <button class="btn btn-primary btn-sm" id="add-exp-top">+ Ausgabe</button>
+  </div>
+
+  <div class="top-bar">
+    <div class="title-block">
+      <div class="trip-title" contenteditable="true" data-placeholder="Reisetitel"
+           id="trip-title" spellcheck="false"></div>
+      <div class="subtitle-row">
+        <div class="trip-subtitle" contenteditable="true" data-placeholder="Untertitel"
+             id="trip-subtitle" spellcheck="false"></div>
+        <span style="color:#DDD;font-size:10px;font-family:Arial,sans-serif">·</span>
+        <select class="currency-select" id="currency-sel">
+          <option>CHF</option><option>EUR</option><option>USD</option>
+          <option>IDR</option><option>THB</option><option>SGD</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-label">Personen</div>
+  <div class="persons-row" id="persons-row"></div>
+
+  <div class="sec-label" style="margin-top:22px">Ausgaben</div>
+
+  <div class="phase-section">
+    <div class="phase-header" id="phase-hdr-vor">
+      <span class="phase-chev open" id="phase-chev-vor">▶</span>
+      <span class="phase-name">Vor der Reise</span>
+      <span class="phase-meta" id="phase-meta-vor"></span>
+      <button class="btn btn-ghost btn-sm phase-add-btn" id="phase-add-vor">+ Ausgabe</button>
+    </div>
+    <div class="phase-body open" id="phase-body-vor"></div>
+  </div>
+
+  <div class="phase-section" style="margin-top:8px">
+    <div class="phase-header" id="phase-hdr-waer">
+      <span class="phase-chev open" id="phase-chev-waer">▶</span>
+      <span class="phase-name">Während der Reise</span>
+      <span class="phase-meta" id="phase-meta-waer"></span>
+      <button class="btn btn-ghost btn-sm phase-add-btn" id="phase-add-waer">+ Ausgabe</button>
+    </div>
+    <div class="phase-body open" id="phase-body-waer"></div>
+  </div>
+
+  <div class="sec-label" style="margin-top:28px">Abrechnung</div>
+  <div id="settlement"></div>
+
+  <div class="file-bar">
+    <span class="file-status" id="file-status">Bereit</span>
+    <button class="file-btn" id="btn-export">⬇ Exportieren</button>
+    <label class="file-btn" style="cursor:pointer">
+      ⬆ Importieren
+      <input type="file" id="import-input" accept=".json" style="display:none">
+    </label>
+    <button class="delete-trip-btn" id="btn-delete-trip">🗑 Reise löschen</button>
+  </div>
+
+  <div class="manu-brand">
+    <div class="manu-label">unterwegs mit</div>
+    <div class="manu-lockup">
+      <span class="manu-logo">MANUventura</span>
+      <span class="manu-div">|</span>
+      <em class="manu-slogan">wir fliehen – aber mit Stil</em>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="expense-modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Ausgabe hinzufügen</div>
+    <div class="form-group">
+      <label class="form-label">Abschnitt</label>
+      <div class="phase-toggle">
+        <div class="phase-toggle-btn active" id="phase-btn-vor" data-phase="vor">Vor der Reise</div>
+        <div class="phase-toggle-btn"        id="phase-btn-waer" data-phase="waer">Während der Reise</div>
+      </div>
+    </div>
+    <div class="payonsite-group" id="payonsite-group" style="display:none">
+      <label>
+        <input type="checkbox" id="exp-payonsite">
+        Bezahlung erst vor Ort — fliesst in Bilanz «Während der Reise»
+      </label>
+    </div>
+    <div class="form-group" style="margin-top:14px">
+      <label class="form-label">Titel</label>
+      <input class="form-input" id="exp-title" placeholder="z.B. Hotel Singapur">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Typ</label>
+        <select class="form-select" id="exp-type">
+          <optgroup label="Verkehrsmittel">
+            <option value="Flug">✈ Flug</option>
+            <option value="Auto / Bus">🚗 Auto / Bus</option>
+            <option value="Zug">🚂 Zug</option>
+            <option value="Schiff">🚢 Schiff</option>
+          </optgroup>
+          <optgroup label="––––––––––">
+            <option value="Unterkunft">🏨 Unterkunft</option>
+            <option value="Essen">🍽 Essen</option>
+            <option value="Aktivität">🏄 Aktivität</option>
+            <option value="Sonstiges">· Sonstiges</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Betrag (leer = unbekannt)</label>
+        <input class="form-input" id="exp-total" type="number" step="0.01" placeholder="0.00">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Bezahlt durch</label>
+        <select class="form-select" id="exp-paidby"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notiz</label>
+        <input class="form-input" id="exp-note" placeholder="z.B. 1975 + 746">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Teilnehmer</label>
+      <div class="part-checks" id="exp-participants"></div>
+    </div>
+    <div class="form-group">
+      <label class="settled-label">
+        <input type="checkbox" id="exp-settled"> Komplett abgerechnet
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-red btn-sm" id="modal-delete" style="display:none;margin-right:auto">Löschen</button>
+      <button class="btn btn-ghost btn-sm" id="modal-cancel">Abbrechen</button>
+      <button class="btn btn-primary btn-sm" id="modal-save">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// STORAGE KEYS
+// ═══════════════════════════════════════════════════════════
+const INDEX_KEY  = 'abrechnung_index_v1';   // [{id, name, subtitle, savedAt}]
+const DATA_PREFIX = 'abrechnung_data_';      // + tripId
+
+function loadIndex() {
+  try { const r = localStorage.getItem(INDEX_KEY); if (r) return JSON.parse(r); } catch(e) {}
+  return null;
+}
+function saveIndex(idx) {
+  localStorage.setItem(INDEX_KEY, JSON.stringify(idx));
+}
+function loadTripData(id) {
+  try { const r = localStorage.getItem(DATA_PREFIX + id); if (r) return JSON.parse(r); } catch(e) {}
+  return null;
+}
+function saveTripData(id, data) {
+  localStorage.setItem(DATA_PREFIX + id, JSON.stringify(data));
+}
+function deleteTripData(id) {
+  localStorage.removeItem(DATA_PREFIX + id);
+}
+function genId() { return 'trip_' + Date.now(); }
+function clone(o) { return JSON.parse(JSON.stringify(o)); }
+
+// ═══════════════════════════════════════════════════════════
+// MIGRATION: if old single-trip data exists, import it
+// ═══════════════════════════════════════════════════════════
+(function migrate() {
+  if (loadIndex()) return; // already migrated
+  const old = localStorage.getItem('crew_abrechnung_pwa_v1');
+  let idx = [];
+  if (old) {
+    try {
+      const d = JSON.parse(old);
+      const id = genId();
+      saveTripData(id, d);
+      idx.push({ id, name: d.trip || 'Sulawesi 26', subtitle: d.subtitle || '', savedAt: d.savedAt || new Date().toISOString() });
+    } catch(e) {}
+  } else {
+    // Fresh install: create default Sulawesi trip
+    const id = genId();
+    const d = {
+      trip: 'Sulawesi 26', subtitle: 'Oktober 2026', currency: 'CHF',
+      persons: ['Patrick Kraus', 'Adina Stern', 'Anna-Lisa Schmalz', 'Sarah Rätz', 'Manuel Wälti'],
+      expenses: [
+        { id:'e1', title:'Zürich – Singapur – Manado', type:'Flug', phase:'vor', payOnSite:false,
+          paidBy:'Manuel Wälti', total:2721, note:"1'975 + 746",
+          participants:['Patrick Kraus','Anna-Lisa Schmalz','Sarah Rätz','Manuel Wälti'],
+          payments:{'Patrick Kraus':680,'Anna-Lisa Schmalz':680,'Sarah Rätz':680}, settled:true },
+        { id:'e2', title:'Bangkok – Zürich', type:'Flug', phase:'vor', payOnSite:false,
+          paidBy:'Manuel Wälti', total:3144, note:'',
+          participants:['Patrick Kraus','Adina Stern','Anna-Lisa Schmalz','Sarah Rätz','Manuel Wälti'],
+          payments:{'Patrick Kraus':600,'Adina Stern':600,'Anna-Lisa Schmalz':600,'Sarah Rätz':600}, settled:false },
+        { id:'e3', title:'Manado – Gorontalo', type:'Flug', phase:'vor', payOnSite:false,
+          paidBy:'Manuel Wälti', total:455, note:'',
+          participants:['Patrick Kraus','Adina Stern','Anna-Lisa Schmalz','Sarah Rätz','Manuel Wälti'],
+          payments:{}, settled:false },
+        { id:'e4', title:'Hotel Singapur', type:'Unterkunft', phase:'vor', payOnSite:true,
+          paidBy:'Anna-Lisa Schmalz', total:null, note:'Bezahlung vor Ort',
+          participants:['Patrick Kraus','Anna-Lisa Schmalz','Sarah Rätz','Manuel Wälti'],
+          payments:{}, settled:false },
+        { id:'e5', title:'Hotel Togean', type:'Unterkunft', phase:'vor', payOnSite:true,
+          paidBy:'Patrick Kraus', total:null, note:'Bezahlung vor Ort',
+          participants:['Patrick Kraus','Adina Stern','Anna-Lisa Schmalz','Sarah Rätz','Manuel Wälti'],
+          payments:{}, settled:false }
+      ]
+    };
+    saveTripData(id, d);
+    idx.push({ id, name: 'Sulawesi 26', subtitle: 'Oktober 2026', savedAt: new Date().toISOString() });
+  }
+  saveIndex(idx);
+})();
+
+// ═══════════════════════════════════════════════════════════
+// APP STATE
+// ═══════════════════════════════════════════════════════════
+let tripIndex  = loadIndex();  // array of {id, name, subtitle, savedAt}
+let currentId  = null;
+let D          = null;         // current trip data
+let editingId  = null;
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function showHome() {
+  currentId = null; D = null;
+  document.getElementById('home-view').style.display = '';
+  document.getElementById('trip-view').style.display = 'none';
+  document.title = 'Abrechnung';
+  renderHome();
+}
+
+function showTrip(id) {
+  const data = loadTripData(id);
+  if (!data) return;
+  currentId = id;
+  D = data;
+  document.getElementById('home-view').style.display = 'none';
+  document.getElementById('trip-view').style.display = '';
+  document.title = D.trip || 'Abrechnung';
+  renderAll();
+  updateStatus();
+}
+
+document.getElementById('back-btn').addEventListener('click', showHome);
+
+// ═══════════════════════════════════════════════════════════
+// HOME: render trip list
+// ═══════════════════════════════════════════════════════════
+function renderHome() {
+  tripIndex = loadIndex() || [];
+  const grid = document.getElementById('trip-grid');
+  grid.innerHTML = '';
+
+  if (!tripIndex.length) {
+    const em = document.createElement('div');
+    em.className = 'trip-empty';
+    em.textContent = 'Noch keine Reisen. Mit «+ Neue Reise» beginnen.';
+    grid.appendChild(em);
+    return;
+  }
+
+  tripIndex.slice().reverse().forEach(entry => {
+    const data = loadTripData(entry.id);
+    const expCount = data ? (data.expenses || []).length : 0;
+    const total    = data ? (data.expenses || []).reduce((s,e) => s + (e.total||0), 0) : 0;
+    const currency = data ? (data.currency || 'CHF') : 'CHF';
+    const meta = [
+      entry.subtitle || '',
+      expCount ? `${expCount} Ausgabe${expCount !== 1 ? 'n' : ''}` : '',
+      total   ? `${currency} ${Math.round(total).toLocaleString('de-CH')}` : ''
+    ].filter(Boolean).join(' · ');
+
+    const card = document.createElement('div');
+    card.className = 'trip-card';
+    card.innerHTML = `
+      <div class="trip-card-dot"></div>
+      <div class="trip-card-body">
+        <div class="trip-card-name">${esc(entry.name)}</div>
+        ${meta ? `<div class="trip-card-meta">${esc(meta)}</div>` : ''}
+      </div>
+      <div class="trip-card-arrow">▶</div>
+    `;
+    card.addEventListener('click', () => showTrip(entry.id));
+    grid.appendChild(card);
+  });
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── New trip form ─────────────────────────────
+document.getElementById('home-new-btn').addEventListener('click', () => {
+  const form = document.getElementById('new-trip-form');
+  form.classList.toggle('open');
+  if (form.classList.contains('open')) {
+    document.getElementById('new-trip-name').focus();
+  }
+});
+document.getElementById('new-trip-cancel').addEventListener('click', () => {
+  document.getElementById('new-trip-form').classList.remove('open');
+  document.getElementById('new-trip-name').value = '';
+  document.getElementById('new-trip-sub').value  = '';
+});
+document.getElementById('new-trip-create').addEventListener('click', createNewTrip);
+document.getElementById('new-trip-name').addEventListener('keydown', e => {
+  if (e.key === 'Enter') createNewTrip();
+});
+
+function createNewTrip() {
+  const name = document.getElementById('new-trip-name').value.trim();
+  if (!name) { document.getElementById('new-trip-name').focus(); return; }
+  const sub  = document.getElementById('new-trip-sub').value.trim();
+  const id   = genId();
+  const data = {
+    trip: name, subtitle: sub, currency: 'CHF',
+    persons: [], expenses: [], savedAt: new Date().toISOString()
+  };
+  saveTripData(id, data);
+  tripIndex = loadIndex() || [];
+  tripIndex.push({ id, name, subtitle: sub, savedAt: data.savedAt });
+  saveIndex(tripIndex);
+  document.getElementById('new-trip-form').classList.remove('open');
+  document.getElementById('new-trip-name').value = '';
+  document.getElementById('new-trip-sub').value  = '';
+  showTrip(id);
+}
+
+// ── Delete trip ──────────────────────────────
+document.getElementById('btn-delete-trip').addEventListener('click', () => {
+  if (!currentId) return;
+  const entry = tripIndex.find(t => t.id === currentId);
+  const name  = entry ? entry.name : 'diese Reise';
+  if (!confirm(`«${name}» wirklich löschen? Alle Daten gehen verloren.`)) return;
+  deleteTripData(currentId);
+  tripIndex = (loadIndex() || []).filter(t => t.id !== currentId);
+  saveIndex(tripIndex);
+  showHome();
+});
+
+// ═══════════════════════════════════════════════════════════
+// TRIP: PERSIST
+// ═══════════════════════════════════════════════════════════
+function save() {
+  if (!currentId) return;
+  D.savedAt = new Date().toISOString();
+  saveTripData(currentId, D);
+  // Update index entry
+  tripIndex = loadIndex() || [];
+  const entry = tripIndex.find(t => t.id === currentId);
+  if (entry) {
+    entry.name     = D.trip     || entry.name;
+    entry.subtitle = D.subtitle || '';
+    entry.savedAt  = D.savedAt;
+  }
+  saveIndex(tripIndex);
+  updateStatus();
+}
+
+function updateStatus() {
+  const el = document.getElementById('file-status');
+  const t = D && D.savedAt ? new Date(D.savedAt).toLocaleTimeString('de-CH') : '';
+  el.textContent = t ? `✓ Gespeichert · ${t}` : 'Bereit';
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function cur() { return D.currency || 'CHF'; }
+function sumVals(obj) { return Object.values(obj||{}).reduce((s,v) => s+(Number(v)||0), 0); }
+function fmtN(n, decimals=2) {
+  return Number(n).toLocaleString('de-CH',{minimumFractionDigits:decimals,maximumFractionDigits:decimals});
+}
+const TYPE_ICON = {
+  'Flug':'✈','Auto / Bus':'🚗','Zug':'🚂','Schiff':'🚢',
+  'Unterkunft':'🏨','Hotel':'🏨','Essen':'🍽','Aktivität':'🏄','Sonstiges':'·'
+};
+function expStatus(exp) {
+  if (exp.settled) return 'settled';
+  if (exp.total==null||exp.total==='') return 'unknown';
+  const n=(exp.participants||[]).length; if(!n) return 'unknown';
+  const share=exp.total/n; const paid=sumVals(exp.payments);
+  return (exp.total-paid-share)>0.005?'open':'settled';
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════════════════════════
+function renderAll() { renderTitle(); renderPersons(); renderExpenses(); renderSettlement(); }
+
+function renderTitle() {
+  const t=document.getElementById('trip-title');
+  const s=document.getElementById('trip-subtitle');
+  const c=document.getElementById('currency-sel');
+  if(document.activeElement!==t) t.textContent=D.trip||'';
+  if(document.activeElement!==s) s.textContent=D.subtitle||'';
+  c.value=D.currency||'CHF';
+}
+
+function renderPersons() {
+  const row=document.getElementById('persons-row');
+  row.innerHTML='';
+  (D.persons||[]).forEach(name=>{
+    const chip=document.createElement('div'); chip.className='person-chip';
+    const span=document.createElement('span'); span.textContent=name;
+    const rm=document.createElement('span'); rm.className='chip-rm'; rm.textContent='×';
+    rm.addEventListener('click',()=>removePerson(name));
+    chip.appendChild(span); chip.appendChild(rm); row.appendChild(chip);
+  });
+  const inp=document.createElement('input');
+  inp.className='add-person-input'; inp.placeholder='Person hinzufügen …';
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addPerson(inp);}});
+  row.appendChild(inp);
+}
+function addPerson(inp){
+  const name=inp.value.trim();
+  if(!name||(D.persons||[]).includes(name)){inp.value='';return;}
+  D.persons=[...(D.persons||[]),name]; save(); renderPersons();
+  const ni=document.querySelector('.add-person-input'); if(ni) ni.focus();
+}
+function removePerson(name){
+  if(!confirm(`"${name}" entfernen?`))return;
+  D.persons=(D.persons||[]).filter(p=>p!==name); save(); renderAll();
+}
+
+function buildExpCard(exp,openIds){
+  const st=expStatus(exp),n=(exp.participants||[]).length,c=cur();
+  const share=(exp.total!=null&&n>0)?exp.total/n:null;
+  const card=document.createElement('div'); card.className=`expense-card ${st}`;
+  const hdr=document.createElement('div'); hdr.className='exp-header';
+  const tb=document.createElement('div'); tb.className='exp-title-block';
+  const te=document.createElement('div'); te.className='exp-title'; te.textContent=exp.title;
+  const se=document.createElement('div'); se.className='exp-sub';
+  se.textContent=`${TYPE_ICON[exp.type]||'·'} ${exp.type} · ${exp.paidBy}`;
+  if(exp.payOnSite){const tg=document.createElement('span');tg.className='pay-site-badge';tg.textContent='Bezahlung vor Ort';se.appendChild(tg);}
+  tb.appendChild(te); tb.appendChild(se);
+  const ae=document.createElement('div'); ae.className='exp-amount';
+  ae.textContent=exp.total!=null?`${c} ${fmtN(exp.total,0)}`:`${c} ?`;
+  const badge=document.createElement('span');
+  badge.className='status-badge '+(st==='settled'?'s-settled':st==='open'?'s-open':'s-unknown');
+  if(st==='settled') badge.textContent='✓ Abgerechnet';
+  else if(st==='unknown') badge.textContent='? Betrag offen';
+  else{const op=exp.total-sumVals(exp.payments)-share;badge.textContent=`${c} ${fmtN(op)} offen`;}
+  const chev=document.createElement('div'); chev.className='exp-chevron'; chev.textContent='▶';
+  hdr.appendChild(tb); hdr.appendChild(ae); hdr.appendChild(badge); hdr.appendChild(chev);
+  const body=document.createElement('div');
+  body.className='exp-body'+(openIds.has(exp.id)?' open':'');
+  body.dataset.eid=exp.id;
+  if(openIds.has(exp.id)) chev.classList.add('open');
+  hdr.addEventListener('click',()=>{const o=body.classList.toggle('open');chev.classList.toggle('open',o);});
+  const grid=document.createElement('div'); grid.className='detail-grid';
+  const ar=(l,v)=>{const ld=document.createElement('div');ld.className='dlbl';ld.textContent=l;const vd=document.createElement('div');vd.className='dval';vd.textContent=v;grid.appendChild(ld);grid.appendChild(vd);};
+  ar('Teilnehmer',(exp.participants||[]).join(' · '));
+  if(share!=null) ar('Pro Person',`${c} ${fmtN(share)}`);
+  if(exp.note) ar('Notiz',exp.note);
+  body.appendChild(grid);
+  const pl=document.createElement('div'); pl.className='sec-label'; pl.style.margin='0 0 4px'; pl.textContent='Zahlungen';
+  body.appendChild(pl);
+  const tbl=document.createElement('table'); tbl.className='pay-table';
+  tbl.innerHTML=`<thead><tr><th>Person</th><th class="r">Anteil</th><th class="r">Bezahlt</th><th class="r">Status</th></tr></thead>`;
+  const tbody=document.createElement('tbody');
+  (exp.participants||[]).forEach(person=>{
+    const isPayer=person===exp.paidBy;
+    const paid=Number((exp.payments||{})[person]||0);
+    const tr=document.createElement('tr');
+    const tn=document.createElement('td'); tn.textContent=person;
+    if(isPayer){const tg=document.createElement('span');tg.className='payer-tag';tg.textContent='zahler';tn.appendChild(tg);}
+    const ts=document.createElement('td'); ts.className='td-r'; ts.style.color='#888';
+    ts.textContent=share!=null?fmtN(share):'?';
+    const tp=document.createElement('td'); tp.className='td-r';
+    const tst=document.createElement('td'); tst.className='td-r'; tst.style.fontWeight='bold'; tst.style.fontSize='11px';
+    if(isPayer){
+      tp.textContent='—';
+      if(share!=null){const owed=Math.max(0,exp.total-sumVals(exp.payments)-share);tst.innerHTML=owed>0.005?`<span style="color:#2A6A3A">← ${fmtN(owed)}</span>`:`<span style="color:#2A6A3A">✓</span>`;}
+      else tst.textContent='—';
+    } else {
+      const inp=document.createElement('input'); inp.type='number'; inp.step='0.01'; inp.className='pay-input'; inp.placeholder='0.00';
+      if(paid>0) inp.value=paid;
+      inp.addEventListener('click',e=>e.stopPropagation());
+      inp.addEventListener('change',()=>updatePayment(exp.id,person,inp.value));
+      tp.appendChild(inp);
+      if(share!=null){const ow=Math.max(0,share-paid);tst.innerHTML=ow>0.005?`<span style="color:#882A20">${fmtN(ow)}</span>`:`<span style="color:#2A6A3A">✓</span>`;}
+      else tst.textContent='?';
+    }
+    tr.appendChild(tn); tr.appendChild(ts); tr.appendChild(tp); tr.appendChild(tst); tbody.appendChild(tr);
+  });
+  tbl.appendChild(tbody); body.appendChild(tbl);
+  const acts=document.createElement('div'); acts.className='exp-actions';
+  const eb=document.createElement('button'); eb.className='btn btn-ghost btn-sm'; eb.textContent='✎ Bearbeiten';
+  eb.addEventListener('click',e=>{e.stopPropagation();openEdit(exp.id);}); acts.appendChild(eb);
+  if(!exp.settled){const sb=document.createElement('button');sb.className='btn btn-green btn-sm';sb.textContent='✓ Abgerechnet';sb.addEventListener('click',e=>{e.stopPropagation();markSettled(exp.id);});acts.appendChild(sb);}
+  const db=document.createElement('button'); db.className='btn btn-red btn-sm'; db.textContent='✕ Löschen';
+  db.addEventListener('click',e=>{e.stopPropagation();deleteExpense(exp.id);}); acts.appendChild(db);
+  body.appendChild(acts); card.appendChild(hdr); card.appendChild(body); return card;
+}
+
+function renderExpenses(){
+  const vb=document.getElementById('phase-body-vor'), wb=document.getElementById('phase-body-waer');
+  const openIds=new Set();
+  [vb,wb].forEach(el=>{if(el)el.querySelectorAll('.exp-body.open').forEach(b=>openIds.add(b.dataset.eid));});
+  vb.innerHTML=''; wb.innerHTML='';
+  const ve=(D.expenses||[]).filter(e=>(e.phase||'vor')!=='waer');
+  const we=(D.expenses||[]).filter(e=>(e.phase||'vor')==='waer');
+  const c=cur();
+  document.getElementById('phase-meta-vor').textContent=ve.length?`${ve.length} Einträge · ${c} ${fmtN(ve.reduce((s,e)=>s+(e.total||0),0),0)}`:'Leer';
+  document.getElementById('phase-meta-waer').textContent=we.length?`${we.length} Einträge · ${c} ${fmtN(we.reduce((s,e)=>s+(e.total||0),0),0)}`:'Leer';
+  if(!ve.length){const em=document.createElement('div');em.className='phase-empty';em.textContent='Noch keine Einträge.';vb.appendChild(em);}
+  ve.forEach(exp=>vb.appendChild(buildExpCard(exp,openIds)));
+  if(!we.length){const em=document.createElement('div');em.className='phase-empty';em.textContent='Noch keine Einträge.';wb.appendChild(em);}
+  we.forEach(exp=>wb.appendChild(buildExpCard(exp,openIds)));
+}
+
+function calcBal(expenses){
+  const persons=D.persons||[]; const bal={};
+  persons.forEach(p=>{bal[p]=0;});
+  expenses.forEach(exp=>{
+    if(exp.total==null||!(exp.participants||[]).length)return;
+    const n=exp.participants.length,share=exp.total/n;
+    if(bal[exp.paidBy]!=null)bal[exp.paidBy]+=exp.total;
+    exp.participants.forEach(p=>{if(bal[p]!=null)bal[p]-=share;});
+    Object.entries(exp.payments||{}).forEach(([p,amt])=>{if(!amt)return;if(bal[p]!=null)bal[p]+=Number(amt);if(bal[exp.paidBy]!=null)bal[exp.paidBy]-=Number(amt);});
+  });
+  return bal;
+}
+function buildSettleBlock(label,expenses){
+  const c=cur(),bal=calcBal(expenses),persons=D.persons||[];
+  const wrapper=document.createElement('div');
+  const lbl=document.createElement('div'); lbl.className='sec-label'; lbl.style.cssText='margin:0 0 6px;color:#999'; lbl.textContent=label;
+  wrapper.appendChild(lbl);
+  const c1=document.createElement('div'); c1.className='settle-card';
+  const hint=document.createElement('div'); hint.style.cssText='font-family:Arial,sans-serif;font-size:9px;color:#CCC;margin-bottom:8px;letter-spacing:.06em;text-transform:uppercase';
+  hint.textContent='Positiv = bekommt Geld · Negativ = schuldet noch'; c1.appendChild(hint);
+  persons.forEach(p=>{
+    const b=bal[p]||0; const row=document.createElement('div'); row.className='bal-row';
+    const ne=document.createElement('span'); ne.style.cssText='font-family:Arial,sans-serif;font-size:12px;color:#333'; ne.textContent=p;
+    const ve2=document.createElement('span'); ve2.style.cssText=`font-family:Arial,sans-serif;font-size:12px;font-weight:bold;color:${b>0.005?'#2A6A3A':b<-0.005?'#882A20':'#888'}`;
+    ve2.textContent=`${b>0.005?'+':''}${c} ${fmtN(Math.abs(b))}${b>0.005?' ← bekommt':b<-0.005?' → schuldet':' ✓'}`;
+    row.appendChild(ne); row.appendChild(ve2); c1.appendChild(row);
+  });
+  if(expenses.some(e=>!e.settled&&e.total==null)){const note=document.createElement('div');note.style.cssText='font-family:Arial,sans-serif;font-size:10px;color:#7A5C10;background:#FAF3E0;padding:6px 10px;border-radius:5px;margin-top:10px';note.textContent='⚠ Positionen mit unbekanntem Betrag (?) wurden nicht einberechnet.';c1.appendChild(note);}
+  wrapper.appendChild(c1);
+  const c2=document.createElement('div'); c2.className='settle-card';
+  const h2=document.createElement('div'); h2.className='settle-title'; h2.textContent='Offene Schulden'; c2.appendChild(h2);
+  const debts=simplifyDebts(bal);
+  if(!debts.length){const ok=document.createElement('div');ok.style.cssText='font-family:Arial,sans-serif;font-size:12px;color:#2A6A3A;padding:6px 0';ok.textContent=expenses.length?'✓ Alles ausgeglichen':'—';c2.appendChild(ok);}
+  else debts.forEach(d=>{
+    const row=document.createElement('div'); row.className='debt-row';
+    const from=document.createElement('span'); from.style.cssText='color:#882A20;font-weight:bold;min-width:100px'; from.textContent=d.from;
+    const arr=document.createElement('span'); arr.style.cssText='color:#CCC;flex:1;text-align:center;font-size:11px;font-family:Arial,sans-serif'; arr.textContent='zahlt →';
+    const to=document.createElement('span'); to.style.cssText='color:#2A6A3A;font-weight:bold;min-width:100px;text-align:right'; to.textContent=d.to;
+    const amt=document.createElement('span'); amt.style.cssText='font-weight:bold;color:#333;font-size:14px;font-family:Arial,sans-serif;margin-left:12px;white-space:nowrap';
+    amt.textContent=`${c} ${fmtN(d.amount)}`; row.appendChild(from);row.appendChild(arr);row.appendChild(to);row.appendChild(amt);c2.appendChild(row);
+  });
+  wrapper.appendChild(c2); return wrapper;
+}
+function renderSettlement(){
+  const el=document.getElementById('settlement'); el.innerHTML='';
+  const all=D.expenses||[];
+  const ve=all.filter(e=>(e.phase||'vor')!=='waer'&&!e.payOnSite);
+  const we=all.filter(e=>(e.phase||'vor')==='waer'||e.payOnSite);
+  el.appendChild(buildSettleBlock('Vor der Reise',ve));
+  const sp=document.createElement('div'); sp.style.height='16px'; el.appendChild(sp);
+  el.appendChild(buildSettleBlock('Während der Reise',we));
+}
+function simplifyDebts(bal){
+  const pos=[],neg=[];
+  Object.entries(bal).forEach(([name,b])=>{if(b>0.005)pos.push({name,amount:b});if(b<-0.005)neg.push({name,amount:-b});});
+  pos.sort((a,b)=>b.amount-a.amount); neg.sort((a,b)=>b.amount-a.amount);
+  const txns=[]; let pi=0,ni=0;
+  while(pi<pos.length&&ni<neg.length){
+    const amt=Math.min(pos[pi].amount,neg[ni].amount);
+    if(amt>0.005)txns.push({from:neg[ni].name,to:pos[pi].name,amount:amt});
+    pos[pi].amount-=amt;neg[ni].amount-=amt;
+    if(pos[pi].amount<0.005)pi++;if(neg[ni].amount<0.005)ni++;
+  }
+  return txns;
+}
+
+// ═══════════════════════════════════════════════════════════
+// EXPENSE OPERATIONS
+// ═══════════════════════════════════════════════════════════
+function updatePayment(expId,person,value){
+  const exp=(D.expenses||[]).find(e=>e.id===expId); if(!exp)return;
+  if(!exp.payments)exp.payments={};
+  const amt=parseFloat(value);
+  if(!amt||amt<=0)delete exp.payments[person]; else exp.payments[person]=amt;
+  save(); renderExpenses(); renderSettlement();
+}
+function markSettled(expId){
+  const exp=(D.expenses||[]).find(e=>e.id===expId); if(!exp)return;
+  exp.settled=true; save(); renderExpenses(); renderSettlement();
+}
+function deleteExpense(expId){
+  if(!confirm('Diese Ausgabe löschen?'))return;
+  D.expenses=(D.expenses||[]).filter(e=>e.id!==expId); save(); renderExpenses(); renderSettlement();
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════════
+function setPhaseUI(phase,payOnSite){
+  document.getElementById('phase-btn-vor').classList.toggle('active',phase!=='waer');
+  document.getElementById('phase-btn-waer').classList.toggle('active',phase==='waer');
+  document.getElementById('payonsite-group').style.display=(phase!=='waer')?'':'none';
+  document.getElementById('exp-payonsite').checked=!!payOnSite;
+}
+function openAdd(phase){
+  editingId=null;
+  document.getElementById('modal-title').textContent='Ausgabe hinzufügen';
+  document.getElementById('modal-delete').style.display='none';
+  document.getElementById('exp-title').value='';
+  document.getElementById('exp-type').value='Flug';
+  document.getElementById('exp-total').value='';
+  document.getElementById('exp-note').value='';
+  document.getElementById('exp-settled').checked=false;
+  setPhaseUI(phase||'vor',false);
+  buildPaidBySelect(null); buildParticipantChips(D.persons||[]);
+  document.getElementById('expense-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('exp-title').focus(),40);
+}
+function openEdit(expId){
+  const exp=(D.expenses||[]).find(e=>e.id===expId); if(!exp)return;
+  editingId=expId;
+  document.getElementById('modal-title').textContent='Ausgabe bearbeiten';
+  document.getElementById('modal-delete').style.display='';
+  document.getElementById('exp-title').value=exp.title||'';
+  document.getElementById('exp-type').value=exp.type||'Flug';
+  document.getElementById('exp-total').value=exp.total!=null?exp.total:'';
+  document.getElementById('exp-note').value=exp.note||'';
+  document.getElementById('exp-settled').checked=!!exp.settled;
+  setPhaseUI(exp.phase||'vor',exp.payOnSite||false);
+  buildPaidBySelect(exp.paidBy); buildParticipantChips(exp.participants||[]);
+  document.getElementById('expense-modal').classList.add('open');
+}
+function buildPaidBySelect(selected){
+  const sel=document.getElementById('exp-paidby'); sel.innerHTML='';
+  (D.persons||[]).forEach(p=>{const opt=document.createElement('option');opt.value=p;opt.textContent=p;if(p===selected)opt.selected=true;sel.appendChild(opt);});
+}
+function buildParticipantChips(selected){
+  const wrap=document.getElementById('exp-participants'); wrap.innerHTML='';
+  (D.persons||[]).forEach(p=>{const chip=document.createElement('div');chip.className='part-chip'+(selected.includes(p)?' active':'');chip.textContent=p;chip.dataset.person=p;chip.addEventListener('click',()=>chip.classList.toggle('active'));wrap.appendChild(chip);});
+}
+function closeModal(){ document.getElementById('expense-modal').classList.remove('open'); editingId=null; }
+function saveExpense(){
+  const title=document.getElementById('exp-title').value.trim();
+  if(!title){alert('Bitte einen Titel eingeben.');return;}
+  const participants=[...document.querySelectorAll('#exp-participants .part-chip.active')].map(c=>c.dataset.person);
+  if(!participants.length){alert('Bitte mindestens eine Person auswählen.');return;}
+  const tv=document.getElementById('exp-total').value;
+  const total=tv!==''?parseFloat(tv):null;
+  const existing=editingId?(D.expenses||[]).find(e=>e.id===editingId):null;
+  const exp={
+    id:editingId||('e'+Date.now()),title,
+    type:document.getElementById('exp-type').value,
+    paidBy:document.getElementById('exp-paidby').value,
+    total,note:document.getElementById('exp-note').value.trim(),
+    participants,payments:existing?(existing.payments||{}):{},
+    settled:document.getElementById('exp-settled').checked,
+    phase:document.getElementById('phase-btn-waer').classList.contains('active')?'waer':'vor',
+    payOnSite:document.getElementById('exp-payonsite').checked,
+  };
+  if(editingId){const idx=D.expenses.findIndex(e=>e.id===editingId);if(idx!==-1)D.expenses[idx]=exp;}
+  else D.expenses=[...(D.expenses||[]),exp];
+  save(); closeModal(); renderAll();
+}
+
+// ═══════════════════════════════════════════════════════════
+// EXPORT / IMPORT
+// ═══════════════════════════════════════════════════════════
+function exportJSON(){
+  const blob=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const date=new Date().toLocaleDateString('de-CH').replace(/\./g,'-');
+  const name=(D.trip||'abrechnung').replace(/[^a-zA-Z0-9_-]/g,'_');
+  a.href=url; a.download=`${name}_${date}.json`; a.click(); URL.revokeObjectURL(url);
+}
+function importJSON(file){
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const parsed=JSON.parse(e.target.result);
+      if(!parsed.persons&&!parsed.expenses)throw new Error('Ungültiges Format');
+      if(!confirm(`"${parsed.trip||'Reise'}" importieren?\nAktuelle Daten werden überschrieben.`))return;
+      D=parsed; save(); renderAll();
+    }catch(err){alert('Fehler beim Import: '+err.message);}
+  };
+  reader.readAsText(file);
+}
+
+// ═══════════════════════════════════════════════════════════
+// WIRE UP
+// ═══════════════════════════════════════════════════════════
+document.getElementById('add-exp-top').addEventListener('click',()=>openAdd('vor'));
+document.getElementById('phase-add-vor').addEventListener('click',e=>{e.stopPropagation();openAdd('vor');});
+document.getElementById('phase-add-waer').addEventListener('click',e=>{e.stopPropagation();openAdd('waer');});
+function togglePhase(id){
+  const body=document.getElementById('phase-body-'+id),chev=document.getElementById('phase-chev-'+id);
+  if(!body)return; const open=body.classList.toggle('open'); chev.classList.toggle('open',open);
+}
+document.getElementById('phase-hdr-vor').addEventListener('click',()=>togglePhase('vor'));
+document.getElementById('phase-hdr-waer').addEventListener('click',()=>togglePhase('waer'));
+document.getElementById('phase-btn-vor').addEventListener('click',()=>setPhaseUI('vor',document.getElementById('exp-payonsite').checked));
+document.getElementById('phase-btn-waer').addEventListener('click',()=>setPhaseUI('waer',false));
+document.getElementById('print-btn').addEventListener('click',()=>{
+  document.querySelectorAll('.exp-body').forEach(b=>b.classList.add('open'));
+  document.querySelectorAll('.exp-chevron').forEach(c=>c.classList.add('open'));
+  document.querySelectorAll('.phase-body').forEach(b=>b.classList.add('open'));
+  document.querySelectorAll('.phase-chev').forEach(c=>c.classList.add('open'));
+  window.print();
+});
+document.getElementById('btn-export').addEventListener('click',exportJSON);
+document.getElementById('import-input').addEventListener('change',e=>{importJSON(e.target.files[0]);e.target.value='';});
+document.getElementById('modal-cancel').addEventListener('click',closeModal);
+document.getElementById('modal-save').addEventListener('click',saveExpense);
+document.getElementById('modal-delete').addEventListener('click',()=>{
+  if(!editingId)return;
+  if(!confirm('Wirklich löschen?'))return;
+  D.expenses=(D.expenses||[]).filter(e=>e.id!==editingId);
+  save(); closeModal(); renderAll();
+});
+document.getElementById('expense-modal').addEventListener('click',e=>{if(e.target===document.getElementById('expense-modal'))closeModal();});
+document.getElementById('trip-title').addEventListener('blur',function(){D.trip=this.textContent.trim();save();renderHome();});
+document.getElementById('trip-subtitle').addEventListener('blur',function(){D.subtitle=this.textContent.trim();save();});
+document.getElementById('currency-sel').addEventListener('change',function(){D.currency=this.value;save();renderExpenses();renderSettlement();});
+
+// ═══════════════════════════════════════════════════════════
+// SERVICE WORKER + INIT
+// ═══════════════════════════════════════════════════════════
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(()=>{}); }
+
+showHome();
+</script>
+</body>
+</html>
