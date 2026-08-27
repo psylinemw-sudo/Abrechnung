@@ -166,12 +166,45 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
 .pay-input { width: 80px; border: 1px solid #E0D8CE; border-radius: 5px; padding: 3px 7px; font-size: 12px; font-family: Arial, sans-serif; text-align: right; outline: none; color: #333; transition: border-color .12s; }
 .pay-input:focus { border-color: #C84828; }
 .exp-actions { display: flex; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #F0EAE2; flex-wrap: wrap; }
-.settle-card { background: #fff; border-radius: 8px; padding: 16px 18px; border: 1px solid #E2DAD0; margin-bottom: 8px; }
+.settle-card { background: #fff; border-radius: 8px; padding: 18px 20px; border: 1px solid #E2DAD0; margin-bottom: 8px; }
 .settle-title { font-family: 'Georgia', serif; font-size: 17px; margin-bottom: 12px; }
 .bal-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #F8F4F0; font-family: Arial, sans-serif; font-size: 12px; }
 .bal-row:last-child { border-bottom: none; }
 .debt-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #F8F4F0; font-family: Arial, sans-serif; font-size: 13px; }
 .debt-row:last-child { border-bottom: none; }
+
+/* ── Settlement redesign ── */
+.settle-section { background:#fff; border-radius:10px; border:1px solid #E2DAD0; margin-bottom:10px; overflow:hidden; }
+.settle-section-hdr { padding:14px 18px 0; }
+.settle-phase-label { font-family:Arial,sans-serif; font-size:9px; font-weight:bold; letter-spacing:.14em; text-transform:uppercase; color:#999; }
+.settle-total { font-family:Arial,sans-serif; font-size:11px; color:#AAA; margin-top:2px; }
+.settle-divider { border:none; border-top:1px solid #F0EAE2; margin:12px 0 0; }
+.saldo-table { width:100%; border-collapse:collapse; font-family:Arial,sans-serif; }
+.saldo-table td { padding:9px 18px; border-bottom:1px solid #F8F4F0; font-size:13px; vertical-align:middle; }
+.saldo-table tr:last-child td { border-bottom:none; }
+.saldo-name { color:#333; font-size:13px; }
+.saldo-bar-cell { width:40%; padding-left:8px !important; }
+.saldo-bar-wrap { height:6px; background:#F0EAE2; border-radius:3px; overflow:hidden; }
+.saldo-bar-fill { height:100%; border-radius:3px; }
+.saldo-amt { text-align:right; font-weight:bold; white-space:nowrap; font-size:13px; }
+.saldo-tag { display:inline-block; font-size:9px; font-weight:bold; letter-spacing:.05em; padding:2px 7px; border-radius:8px; margin-left:6px; vertical-align:middle; }
+.tag-get { background:#E8F5EC; color:#2A6A3A; }
+.tag-owe { background:#FAE9E7; color:#882A20; }
+.tag-ok  { background:#F0EAE2; color:#888; }
+
+.transfer-section { padding:0 18px 14px; }
+.transfer-label { font-family:Arial,sans-serif; font-size:9px; font-weight:bold; letter-spacing:.12em; text-transform:uppercase; color:#BBB; margin:14px 0 8px; }
+.transfer-row {
+  display:flex; align-items:center; gap:0;
+  background:#FDFCFA; border:1px solid #EDE8E2; border-radius:8px;
+  margin-bottom:6px; overflow:hidden;
+}
+.transfer-from { padding:10px 14px; font-family:Arial,sans-serif; font-size:12px; color:#882A20; font-weight:bold; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.transfer-arrow { font-family:Arial,sans-serif; font-size:11px; color:#CCC; padding:0 6px; flex-shrink:0; }
+.transfer-to { padding:10px 14px; font-family:Arial,sans-serif; font-size:12px; color:#2A6A3A; font-weight:bold; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:right; }
+.transfer-amt { background:#F0EAE2; padding:10px 14px; font-family:Arial,sans-serif; font-size:13px; font-weight:bold; color:#333; white-space:nowrap; flex-shrink:0; }
+.all-settled { padding:14px 18px; font-family:Arial,sans-serif; font-size:13px; color:#2A6A3A; display:flex; align-items:center; gap:8px; }
+.unknown-note { margin:10px 18px 14px; padding:8px 12px; background:#FAF3E0; border-radius:6px; font-family:Arial,sans-serif; font-size:11px; color:#7A5C10; }
 .file-bar { display: flex; align-items: center; gap: 6px; margin-top: 28px; padding-top: 18px; border-top: 1px solid #E2DAD0; flex-wrap: wrap; }
 .file-status { font-family: Arial, sans-serif; font-size: 10px; color: #BBB; flex: 1; min-width: 140px; }
 .file-btn { background: none; border: 1px solid #E0D8CE; border-radius: 6px; padding: 5px 11px; font-size: 10px; font-family: Arial, sans-serif; color: #888; cursor: pointer; transition: all .15s; white-space: nowrap; }
@@ -837,44 +870,117 @@ function calcBal(expenses){
   });
   return bal;
 }
-function buildSettleBlock(label,expenses){
-  const c=cur(),bal=calcBal(expenses),persons=D.persons||[];
-  const wrapper=document.createElement('div');
-  const lbl=document.createElement('div'); lbl.className='sec-label'; lbl.style.cssText='margin:0 0 6px;color:#999'; lbl.textContent=label;
-  wrapper.appendChild(lbl);
-  const c1=document.createElement('div'); c1.className='settle-card';
-  const hint=document.createElement('div'); hint.style.cssText='font-family:Arial,sans-serif;font-size:9px;color:#CCC;margin-bottom:8px;letter-spacing:.06em;text-transform:uppercase';
-  hint.textContent='Positiv = bekommt Geld · Negativ = schuldet noch'; c1.appendChild(hint);
-  persons.forEach(p=>{
-    const b=bal[p]||0; const row=document.createElement('div'); row.className='bal-row';
-    const ne=document.createElement('span'); ne.style.cssText='font-family:Arial,sans-serif;font-size:12px;color:#333'; ne.textContent=p;
-    const ve2=document.createElement('span'); ve2.style.cssText=`font-family:Arial,sans-serif;font-size:12px;font-weight:bold;color:${b>0.005?'#2A6A3A':b<-0.005?'#882A20':'#888'}`;
-    ve2.textContent=`${b>0.005?'+':''}${c} ${fmtN(Math.abs(b))}${b>0.005?' ← bekommt':b<-0.005?' → schuldet':' ✓'}`;
-    row.appendChild(ne); row.appendChild(ve2); c1.appendChild(row);
+
+function buildSettleBlock(label, expenses) {
+  const c = cur();
+  const bal = calcBal(expenses);
+  const persons = D.persons || [];
+  const debts = simplifyDebts(bal);
+  const total = expenses.reduce((s,e) => s+(e.total||0), 0);
+  const hasUnknown = expenses.some(e => !e.settled && e.total==null);
+
+  const sec = document.createElement('div');
+  sec.className = 'settle-section';
+
+  // Header
+  const hdr = document.createElement('div');
+  hdr.className = 'settle-section-hdr';
+  const phLbl = document.createElement('div'); phLbl.className = 'settle-phase-label'; phLbl.textContent = label;
+  hdr.appendChild(phLbl);
+  if (total > 0) {
+    const tot = document.createElement('div'); tot.className = 'settle-total';
+    tot.textContent = `Total ${c} ${fmtN(total, 0)} · ${expenses.length} Ausgabe${expenses.length!==1?'n':''}`;
+    hdr.appendChild(tot);
+  }
+  sec.appendChild(hdr);
+
+  const hr = document.createElement('hr'); hr.className = 'settle-divider';
+  sec.appendChild(hr);
+
+  if (!expenses.length) {
+    const empty = document.createElement('div');
+    empty.style.cssText = 'padding:12px 18px 14px;font-family:Arial,sans-serif;font-size:12px;color:#CCC';
+    empty.textContent = 'Noch keine Ausgaben.';
+    sec.appendChild(empty);
+    return sec;
+  }
+
+  // Saldo table
+  const maxAbs = Math.max(...persons.map(p => Math.abs(bal[p]||0)), 1);
+  const tbl = document.createElement('table'); tbl.className = 'saldo-table';
+  const tbody = document.createElement('tbody');
+
+  persons.forEach(p => {
+    const b = bal[p] || 0;
+    const isPos = b > 0.005, isNeg = b < -0.005;
+    const tr = document.createElement('tr');
+
+    // Name
+    const tdN = document.createElement('td'); tdN.className = 'saldo-name'; tdN.textContent = p;
+
+    // Bar
+    const tdB = document.createElement('td'); tdB.className = 'saldo-bar-cell';
+    const wrap = document.createElement('div'); wrap.className = 'saldo-bar-wrap';
+    const fill = document.createElement('div'); fill.className = 'saldo-bar-fill';
+    const pct = Math.round((Math.abs(b)/maxAbs)*100);
+    fill.style.cssText = `width:${pct}%;background:${isPos?'#2A6A3A':isNeg?'#C84828':'#CCC'}`;
+    wrap.appendChild(fill); tdB.appendChild(wrap);
+
+    // Amount + tag
+    const tdA = document.createElement('td'); tdA.className = 'saldo-amt';
+    const sign = isPos ? '+' : isNeg ? '−' : '';
+    const amtSpan = document.createElement('span');
+    amtSpan.style.color = isPos?'#2A6A3A':isNeg?'#882A20':'#888';
+    amtSpan.textContent = `${sign}${c} ${fmtN(Math.abs(b),0)}`;
+    const tag = document.createElement('span');
+    tag.className = 'saldo-tag ' + (isPos?'tag-get':isNeg?'tag-owe':'tag-ok');
+    tag.textContent = isPos?'bekommt':isNeg?'schuldet':'✓';
+    tdA.appendChild(amtSpan); tdA.appendChild(tag);
+
+    tr.appendChild(tdN); tr.appendChild(tdB); tr.appendChild(tdA);
+    tbody.appendChild(tr);
   });
-  if(expenses.some(e=>!e.settled&&e.total==null)){const note=document.createElement('div');note.style.cssText='font-family:Arial,sans-serif;font-size:10px;color:#7A5C10;background:#FAF3E0;padding:6px 10px;border-radius:5px;margin-top:10px';note.textContent='⚠ Positionen mit unbekanntem Betrag (?) wurden nicht einberechnet.';c1.appendChild(note);}
-  wrapper.appendChild(c1);
-  const c2=document.createElement('div'); c2.className='settle-card';
-  const h2=document.createElement('div'); h2.className='settle-title'; h2.textContent='Offene Schulden'; c2.appendChild(h2);
-  const debts=simplifyDebts(bal);
-  if(!debts.length){const ok=document.createElement('div');ok.style.cssText='font-family:Arial,sans-serif;font-size:12px;color:#2A6A3A;padding:6px 0';ok.textContent=expenses.length?'✓ Alles ausgeglichen':'—';c2.appendChild(ok);}
-  else debts.forEach(d=>{
-    const row=document.createElement('div'); row.className='debt-row';
-    const from=document.createElement('span'); from.style.cssText='color:#882A20;font-weight:bold;min-width:100px'; from.textContent=d.from;
-    const arr=document.createElement('span'); arr.style.cssText='color:#CCC;flex:1;text-align:center;font-size:11px;font-family:Arial,sans-serif'; arr.textContent='zahlt →';
-    const to=document.createElement('span'); to.style.cssText='color:#2A6A3A;font-weight:bold;min-width:100px;text-align:right'; to.textContent=d.to;
-    const amt=document.createElement('span'); amt.style.cssText='font-weight:bold;color:#333;font-size:14px;font-family:Arial,sans-serif;margin-left:12px;white-space:nowrap';
-    amt.textContent=`${c} ${fmtN(d.amount)}`; row.appendChild(from);row.appendChild(arr);row.appendChild(to);row.appendChild(amt);c2.appendChild(row);
-  });
-  wrapper.appendChild(c2); return wrapper;
+  tbl.appendChild(tbody);
+  sec.appendChild(tbl);
+
+  // Unknown note
+  if (hasUnknown) {
+    const note = document.createElement('div'); note.className = 'unknown-note';
+    note.textContent = '⚠ Einige Beträge noch unbekannt (?) — nicht einberechnet.';
+    sec.appendChild(note);
+  }
+
+  // Transfers
+  if (debts.length) {
+    const ts = document.createElement('div'); ts.className = 'transfer-section';
+    const tl = document.createElement('div'); tl.className = 'transfer-label'; tl.textContent = 'Wer zahlt wem';
+    ts.appendChild(tl);
+    debts.forEach(d => {
+      const row = document.createElement('div'); row.className = 'transfer-row';
+      const from = document.createElement('div'); from.className = 'transfer-from'; from.textContent = d.from;
+      const arr  = document.createElement('div'); arr.className  = 'transfer-arrow'; arr.textContent = '→';
+      const to   = document.createElement('div'); to.className   = 'transfer-to';   to.textContent = d.to;
+      const amt  = document.createElement('div'); amt.className  = 'transfer-amt';  amt.textContent = `${c} ${fmtN(d.amount, 0)}`;
+      row.appendChild(from); row.appendChild(arr); row.appendChild(to); row.appendChild(amt);
+      ts.appendChild(row);
+    });
+    sec.appendChild(ts);
+  } else if (!hasUnknown) {
+    const ok = document.createElement('div'); ok.className = 'all-settled';
+    ok.innerHTML = '<span style="font-size:18px">✓</span> Alles ausgeglichen';
+    sec.appendChild(ok);
+  }
+
+  return sec;
 }
+
 function renderSettlement(){
   const el=document.getElementById('settlement'); el.innerHTML='';
   const all=D.expenses||[];
   const ve=all.filter(e=>(e.phase||'vor')!=='waer'&&!e.payOnSite);
   const we=all.filter(e=>(e.phase||'vor')==='waer'||e.payOnSite);
   el.appendChild(buildSettleBlock('Vor der Reise',ve));
-  const sp=document.createElement('div'); sp.style.height='16px'; el.appendChild(sp);
+  const sp=document.createElement('div'); sp.style.height='10px'; el.appendChild(sp);
   el.appendChild(buildSettleBlock('Während der Reise',we));
 }
 function simplifyDebts(bal){
