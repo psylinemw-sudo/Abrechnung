@@ -550,7 +550,7 @@ function showTrip(id) {
   currentId = id;
   D = data;
   document.getElementById('home-view').style.display = 'none';
-  document.getElementById('trip-view').style.display = '';
+  document.getElementById('trip-view').style.display = 'block';
   document.title = D.trip || 'Abrechnung';
   renderAll();
   updateStatus();
