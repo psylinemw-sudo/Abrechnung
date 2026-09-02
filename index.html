@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Abrechnung</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#C84828">
+<meta name="theme-color" content="#1A1A1A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Abrechnung">
@@ -20,8 +20,8 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
   font-family: Arial, sans-serif; font-size: 11px; font-weight: bold;
   letter-spacing: .06em; text-transform: uppercase; transition: all .15s; white-space: nowrap;
 }
-.btn-primary { background: #C84828; color: #fff; }
-.btn-primary:hover { background: #A83818; }
+.btn-primary { background: #1A1A1A; color: #fff; }
+.btn-primary:hover { background: #333; }
 .btn-ghost { background: #E4DDD5; color: #555; }
 .btn-ghost:hover { background: #D5C9BC; }
 .btn-green { background: #E8F5EC; color: #2A6A3A; }
@@ -60,7 +60,7 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
 }
 .trip-card:hover { box-shadow: 0 3px 16px rgba(0,0,0,.09); transform: translateY(-1px); }
 .trip-card-dot {
-  width: 10px; height: 10px; border-radius: 50%; background: #C84828; flex-shrink: 0; margin-top: 2px;
+  width: 10px; height: 10px; border-radius: 50%; background: #1A1A1A; flex-shrink: 0; margin-top: 2px;
 }
 .trip-card-body { flex: 1; min-width: 0; }
 .trip-card-name {
@@ -89,7 +89,7 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
   font-size: 13px; font-family: Arial, sans-serif; outline: none; color: #333;
   background: #fff; transition: border-color .12s; flex: 1; min-width: 140px;
 }
-.new-trip-input:focus { border-color: #C84828; }
+.new-trip-input:focus { border-color: #1A1A1A; }
 
 /* Home branding */
 .home-brand {
@@ -107,7 +107,7 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
   margin-bottom: 24px; flex-wrap: wrap;
 }
 .back-btn {
-  font-family: Arial, sans-serif; font-size: 11px; color: #C84828;
+  font-family: Arial, sans-serif; font-size: 11px; color: #555;
   background: none; border: none; cursor: pointer; padding: 4px 0;
   letter-spacing: .04em; font-weight: bold; flex-shrink: 0;
 }
@@ -131,7 +131,7 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
 .chip-rm { cursor: pointer; color: #CCC; font-size: 15px; line-height: 1; transition: color .1s; }
 .chip-rm:hover { color: #882A20; }
 .add-person-input { border: 1px dashed #CCC; border-radius: 20px; padding: 5px 14px; font-size: 12px; font-family: Arial, sans-serif; outline: none; width: 160px; background: transparent; color: #555; transition: border-color .15s, background .15s; }
-.add-person-input:focus { border-color: #C84828; background: #fff; }
+.add-person-input:focus { border-color: #1A1A1A; background: #fff; }
 .add-person-input::placeholder { color: #CCC; }
 
 .expense-card { background: #fff; border-radius: 8px; margin-bottom: 8px; overflow: hidden; border: 1px solid #E2DAD0; transition: box-shadow .15s; }
@@ -164,7 +164,7 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
 .td-r { text-align: right; }
 .payer-tag { display: inline-block; font-size: 9px; background: #F5F0EB; color: #AAA; padding: 1px 6px; border-radius: 4px; margin-left: 5px; }
 .pay-input { width: 80px; border: 1px solid #E0D8CE; border-radius: 5px; padding: 3px 7px; font-size: 12px; font-family: Arial, sans-serif; text-align: right; outline: none; color: #333; transition: border-color .12s; }
-.pay-input:focus { border-color: #C84828; }
+.pay-input:focus { border-color: #1A1A1A; }
 .exp-actions { display: flex; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #F0EAE2; flex-wrap: wrap; }
 .settle-card { background: #fff; border-radius: 8px; padding: 18px 20px; border: 1px solid #E2DAD0; margin-bottom: 8px; }
 .settle-title { font-family: 'Georgia', serif; font-size: 17px; margin-bottom: 12px; }
@@ -208,7 +208,7 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
 .file-bar { display: flex; align-items: center; gap: 6px; margin-top: 28px; padding-top: 18px; border-top: 1px solid #E2DAD0; flex-wrap: wrap; }
 .file-status { font-family: Arial, sans-serif; font-size: 10px; color: #BBB; flex: 1; min-width: 140px; }
 .file-btn { background: none; border: 1px solid #E0D8CE; border-radius: 6px; padding: 5px 11px; font-size: 10px; font-family: Arial, sans-serif; color: #888; cursor: pointer; transition: all .15s; white-space: nowrap; }
-.file-btn:hover { border-color: #C84828; color: #C84828; }
+.file-btn:hover { border-color: #1A1A1A; color: #1A1A1A; }
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
 .modal-overlay.open { display: flex; }
 .modal { background: #fff; border-radius: 12px; padding: 26px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,.2); }
@@ -216,7 +216,7 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
 .form-group { margin-bottom: 14px; }
 .form-label { display: block; font-family: Arial, sans-serif; font-size: 9px; font-weight: bold; letter-spacing: .1em; text-transform: uppercase; color: #AAA; margin-bottom: 5px; }
 .form-input, .form-select { width: 100%; border: 1px solid #E0D8CE; border-radius: 6px; padding: 9px 12px; font-size: 13px; font-family: Arial, sans-serif; outline: none; color: #333; background: #fff; transition: border-color .12s; }
-.form-input:focus, .form-select:focus { border-color: #C84828; }
+.form-input:focus, .form-select:focus { border-color: #1A1A1A; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .part-checks { display: flex; flex-wrap: wrap; gap: 6px; }
 .part-chip { padding: 5px 12px; border: 1px solid #E5DDD5; border-radius: 16px; font-family: Arial, sans-serif; font-size: 12px; color: #555; cursor: pointer; user-select: none; transition: all .12s; }
@@ -256,7 +256,7 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
   font-size:18px; display:flex; align-items:center; justify-content:center;
   transition:border-color .12s, background .12s;
 }
-.scan-btn:hover { border-color:#C84828; background:#FFF5F3; }
+.scan-btn:hover { border-color:#1A1A1A; background:#F5F5F5; }
 .scan-btn:disabled { opacity:.4; cursor:default; }
 .scan-status {
   display:none; margin-top:5px; font-family:Arial,sans-serif;
@@ -265,7 +265,7 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
 .scan-status.visible { display:flex; }
 .scan-spinner {
   width:12px; height:12px; border:2px solid #E0D8CE;
-  border-top-color:#C84828; border-radius:50%;
+  border-top-color:#1A1A1A; border-radius:50%;
   animation:spin .7s linear infinite; flex-shrink:0;
 }
 @keyframes spin { to { transform:rotate(360deg); } }
@@ -293,7 +293,7 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
   align-items:center; gap:8px;
 }
 .scan-overlay-btn span { font-size:14px; font-weight:600; }
-.scan-overlay-cam  { background:#C84828; color:#fff; }
+.scan-overlay-cam  { background:#333; color:#fff; border:1px solid #555; }
 .scan-overlay-file { background:#2A2A2A; color:#fff; border:1px solid #444; }
 .scan-overlay-cancel {
   margin-top:12px; background:none; border:none; color:#888;
@@ -302,7 +302,7 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
 
 /* ── Itemized receipt ── */
 .itemize-toggle { display:flex; align-items:center; gap:7px; font-family:Arial,sans-serif; font-size:12px; color:#444; cursor:pointer; margin-top:6px; }
-.itemize-toggle input { accent-color:#C84828; cursor:pointer; }
+.itemize-toggle input { accent-color:#1A1A1A; cursor:pointer; }
 .items-list { margin-top:10px; border:1px solid #EDE8E2; border-radius:8px; overflow:hidden; }
 .item-row { padding:9px 12px; border-bottom:1px solid #F5F0EB; }
 .item-row:last-child { border-bottom:none; }
@@ -409,8 +409,7 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
     <button class="back-btn" id="back-btn">← Alle Reisen</button>
     <span class="trip-nav-spacer"></span>
     <button class="btn btn-ghost btn-sm" id="print-btn">🖨 Drucken / PDF</button>
-    <button class="btn btn-ghost btn-sm" id="nav-scan-btn" title="Kamera">📷 Kamera</button>
-    <button class="btn btn-ghost btn-sm" id="nav-scan-btn-file" title="Galerie / Datei">🖼 Galerie</button>
+    <button class="btn btn-ghost btn-sm" id="nav-scan-btn" title="Quittung scannen">📷 Scannen</button>
     <button class="btn btn-primary btn-sm" id="add-exp-top">+ Ausgabe</button>
     <input type="file" id="nav-scan-input"      accept="image/*" capture="environment" style="display:none">
     <input type="file" id="nav-scan-input-file" accept="image/*" style="display:none">
@@ -457,8 +456,12 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
     <div class="phase-body open" id="phase-body-waer"></div>
   </div>
 
-  <div class="sec-label" style="margin-top:28px">Abrechnung</div>
-  <div id="settlement"></div>
+  <div class="phase-header" id="settle-toggle" style="margin-top:28px;border-radius:8px 8px 0 0">
+    <span class="phase-chev open" id="settle-chev">▶</span>
+    <span class="phase-name">Abrechnung</span>
+    <span class="phase-meta" id="settle-meta"></span>
+  </div>
+  <div id="settlement" style="display:block"></div>
 
   <div class="file-bar">
     <span class="file-status" id="file-status">Bereit</span>
@@ -1216,11 +1219,67 @@ document.getElementById('phase-hdr-waer').addEventListener('click',()=>togglePha
 document.getElementById('phase-btn-vor').addEventListener('click',()=>setPhaseUI('vor',document.getElementById('exp-payonsite').checked));
 document.getElementById('phase-btn-waer').addEventListener('click',()=>setPhaseUI('waer',false));
 document.getElementById('print-btn').addEventListener('click',()=>{
-  document.querySelectorAll('.exp-body').forEach(b=>b.classList.add('open'));
-  document.querySelectorAll('.exp-chevron').forEach(c=>c.classList.add('open'));
-  document.querySelectorAll('.phase-body').forEach(b=>b.classList.add('open'));
-  document.querySelectorAll('.phase-chev').forEach(c=>c.classList.add('open'));
-  window.print();
+  // Build a standalone print-page with all sections expanded
+  const title = (D.trip || 'Abrechnung') + (D.subtitle ? ' · ' + D.subtitle : '');
+  const c = cur();
+
+  // Gather expenses per phase
+  function expRows(list) {
+    if (!list.length) return '<tr><td colspan="5" style="color:#aaa;font-size:11px;padding:6px 0">Keine Einträge</td></tr>';
+    return list.map(e => {
+      const share = e.participants && e.participants.length ? (e.total||0)/e.participants.length : 0;
+      const status = e.settled ? '✓' : (e.total==null ? '?' : '○');
+      return `<tr>
+        <td>${e.date||''}</td>
+        <td>${e.desc||''}</td>
+        <td>${e.paidBy||''}</td>
+        <td style="text-align:right">${c} ${fmtN(e.total||0)}</td>
+        <td>${(e.participants||[]).join(', ')}</td>
+        <td style="text-align:center">${status}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  const all = D.expenses||[];
+  const vor  = all.filter(e=>(e.phase||'vor')!=='waer'&&!e.payOnSite);
+  const waer = all.filter(e=>e.phase==='waer'||e.payOnSite);
+
+  // Balance
+  const bal = calcBal(all);
+  const balRows = Object.entries(bal).map(([p,b])=>`<tr><td>${p}</td><td style="text-align:right;font-weight:bold;color:${b>=0?'#2A6A3A':'#882A20'}">${c} ${b>=0?'+':''}${fmtN(b)}</td></tr>`).join('');
+
+  const html = `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">
+  <title>${title}</title>
+  <style>
+    body{font-family:Arial,sans-serif;font-size:12px;color:#222;max-width:900px;margin:0 auto;padding:32px 24px}
+    h1{font-family:Georgia,serif;font-size:28px;font-weight:normal;margin-bottom:4px}
+    h2{font-family:Georgia,serif;font-size:16px;font-weight:normal;margin:24px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}
+    table{width:100%;border-collapse:collapse;margin-bottom:16px}
+    th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#999;border-bottom:1px solid #eee;padding:4px 6px}
+    td{padding:5px 6px;border-bottom:1px solid #f5f5f5;vertical-align:top}
+    .subtitle{font-size:11px;color:#aaa;letter-spacing:.1em;text-transform:uppercase;margin-bottom:24px}
+    @media print{@page{margin:1.5cm}}
+  </style></head><body>
+  <h1>${title}</h1>
+  <div class="subtitle">${new Date().toLocaleDateString('de-CH')}</div>
+  <h2>Vor der Reise</h2>
+  <table><tr><th>Datum</th><th>Beschreibung</th><th>Bezahlt von</th><th style="text-align:right">Betrag</th><th>Teilnehmer</th><th>Status</th></tr>${expRows(vor)}</table>
+  <h2>Während der Reise</h2>
+  <table><tr><th>Datum</th><th>Beschreibung</th><th>Bezahlt von</th><th style="text-align:right">Betrag</th><th>Teilnehmer</th><th>Status</th></tr>${expRows(waer)}</table>
+  <h2>Bilanz</h2>
+  <table><tr><th>Person</th><th style="text-align:right">Saldo</th></tr>${balRows}</table>
+  <script>window.onload=()=>{window.print();}<\/script>
+  </body></html>`;
+
+  const blob = new Blob([html], {type:'text/html'});
+  const url  = URL.createObjectURL(blob);
+  const w = window.open(url, '_blank');
+  if (!w) { // popup blocked — fallback to direct print
+    document.querySelectorAll('.exp-body').forEach(b=>b.classList.add('open'));
+    document.querySelectorAll('.phase-body').forEach(b=>b.classList.add('open'));
+    window.print();
+  }
+  setTimeout(()=>URL.revokeObjectURL(url), 30000);
 });
 document.getElementById('btn-export').addEventListener('click',exportJSON);
 document.getElementById('import-input').addEventListener('change',e=>{importJSON(e.target.files[0]);e.target.value='';});
@@ -1236,6 +1295,13 @@ document.getElementById('expense-modal').addEventListener('click',e=>{if(e.targe
 document.getElementById('trip-title').addEventListener('blur',function(){D.trip=this.textContent.trim();save();renderHome();});
 document.getElementById('trip-subtitle').addEventListener('blur',function(){D.subtitle=this.textContent.trim();save();});
 document.getElementById('currency-sel').addEventListener('change',function(){D.currency=this.value;save();renderExpenses();renderSettlement();});
+document.getElementById('settle-toggle').addEventListener('click', () => {
+  const el = document.getElementById('settlement');
+  const chev = document.getElementById('settle-chev');
+  const open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  chev.classList.toggle('open', !open);
+});
 
 // ═══════════════════════════════════════════════════════════
 // RECEIPT SCAN (Tesseract.js)
@@ -1271,20 +1337,92 @@ function extractAmount(text) {
   return null;
 }
 
+function extractReceiptName(text) {
+  // Skip noise lines (dates, phone, URLs, single chars, pure numbers)
+  const skipRe = /^\d{1,2}[.\/\-]\d{1,2}|tel|www\.|@|^\d+$|kasse|tisch|bedien|bon|rechnung|quittung|mwst|mehrwert|steuer|total|summe|gesamt|danke|vielen/i;
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  // Look through first 8 lines for a plausible business name
+  for (const line of lines.slice(0, 8)) {
+    if (skipRe.test(line)) continue;
+    if (line.length < 3 || line.length > 60) continue;
+    // Must contain at least one letter
+    if (!/[a-zA-ZäöüÄÖÜ]/.test(line)) continue;
+    // Prefer lines that look like names (not mostly numbers)
+    const numRatio = (line.match(/\d/g) || []).length / line.length;
+    if (numRatio > 0.4) continue;
+    return line;
+  }
+  return null;
+}
+
 function extractItems(text) {
   const skipRe = /total|summe|mwst|mehrwert|steuer|gesamt|zwischentotal|subtotal|rabatt|discount|trinkgeld|service/i;
   const priceRe = /([0-9]{1,5}[.,][0-9]{2})\s*$/;
-  const items = [];
+  // Detects leading quantity: "3x", "2 x", "3×", "3 Stk", "2St"
+  const qtyRe   = /^(\d+)\s*[x×xX]?\s*(?:stk|st\.?)?\s*/i;
+  const raw = [];
+
   for (const line of text.split('\n').map(l => l.trim()).filter(Boolean)) {
     const m = line.match(priceRe);
     if (!m) continue;
     if (skipRe.test(line)) continue;
     const price = parseFloat(m[1].replace(',', '.'));
-    const name  = line.substring(0, line.lastIndexOf(m[0])).replace(/[\s.:]+$/, '').trim();
+    let name = line.substring(0, line.lastIndexOf(m[0])).replace(/[\s.:]+$/, '').trim();
     if (price <= 0 || price >= 5000 || name.length < 2) continue;
-    items.push({ name: name || `Position ${items.length+1}`, price, persons: [] });
+
+    let qty = 1;
+
+    // Format 1: "3x Cola" or "3× Cola" — quantity prefix
+    const qPre = name.match(/^(\d+)\s*[x×]\s+/i);
+    if (qPre && parseInt(qPre[1]) > 1) {
+      qty = parseInt(qPre[1]);
+      name = name.substring(qPre[0].length).trim();
+    } else {
+      // Format 2: "Cola 3x" or "Cola 3×" — quantity suffix in name → price is unit price
+      const qSuf = name.match(/\s+(\d+)\s*[x×]\s*$/i);
+      if (qSuf && parseInt(qSuf[1]) > 1) {
+        qty = parseInt(qSuf[1]);
+        name = name.substring(0, name.length - qSuf[0].length).trim();
+        // price on the line is the unit price → total = qty * price
+        // (already parsed as price; multiply below after merge)
+      } else {
+        // Format 3: "Cola   3   4.50" — lone integer before the price on same line
+        // Check if the text just before the price number is a small integer (qty)
+        const beforePrice = line.substring(0, line.lastIndexOf(m[0])).trim();
+        const qMid = beforePrice.match(/^(.*?)\s+(\d{1,2})\s*$/);
+        if (qMid && parseInt(qMid[2]) > 1 && parseInt(qMid[2]) <= 99) {
+          qty = parseInt(qMid[2]);
+          name = qMid[1].replace(/[\s.:]+$/, '').trim();
+        }
+      }
+    }
+
+    // If qty was detected via suffix/mid, the OCR price is unit price → total = qty × unitPrice
+    if (qty > 1 && !qPre) {
+      raw.push({ name: name || `Position ${raw.length+1}`, price: Math.round(price * qty * 100) / 100, qty, persons: [] });
+    } else {
+      raw.push({ name: name || `Position ${raw.length+1}`, price, qty, persons: [] });
+    }
   }
-  return items;
+
+  // Merge duplicates (same name, same unit price within ±1 cent)
+  const merged = [];
+  raw.forEach(item => {
+    const unitPrice = Math.round(item.price / item.qty * 100) / 100;
+    const existing = merged.find(e => {
+      const eu = Math.round(e.price / e.qty * 100) / 100;
+      return e.name.toLowerCase() === item.name.toLowerCase()
+          && Math.abs(eu - unitPrice) < 0.02;
+    });
+    if (existing) {
+      existing.qty += item.qty;
+      existing.price = Math.round((existing.price + item.price) * 100) / 100;
+    } else {
+      merged.push({ ...item });
+    }
+  });
+
+  return merged;
 }
 
 function buildItemsUI(items) {
@@ -1297,9 +1435,11 @@ function buildItemsUI(items) {
   items.forEach((item, idx) => {
     const row = document.createElement('div'); row.className = 'item-row';
     const top = document.createElement('div'); top.className = 'item-row-top';
-    const nm  = document.createElement('div'); nm.className = 'item-row-name'; nm.textContent = item.name;
+    const nm  = document.createElement('div'); nm.className = 'item-row-name';
+    nm.textContent = (item.qty > 1 ? `${item.qty}× ` : '') + item.name;
     const pr  = document.createElement('div'); pr.className = 'item-row-price';
-    pr.textContent = `${cur()} ${fmtN(item.price)}`;
+    const unit = item.qty > 1 ? ` (${cur()} ${fmtN(Math.round(item.price/item.qty*100)/100)} /St.)` : '';
+    pr.innerHTML = `${cur()} ${fmtN(item.price)}<span style="color:#aaa;font-size:10px">${unit}</span>`;
     top.appendChild(nm); top.appendChild(pr); row.appendChild(top);
 
     const chips = document.createElement('div'); chips.className = 'item-persons';
@@ -1393,6 +1533,13 @@ async function scanReceipt(file, fromNav) {
       scanStatus('Kein Betrag erkannt — bitte manuell eingeben', 'err');
     }
 
+    // Try to detect restaurant/store name from first lines
+    const detectedName = extractReceiptName(text);
+    if (detectedName) {
+      const descField = document.getElementById('exp-desc');
+      if (descField && !descField.value) descField.value = detectedName;
+    }
+
     // Extract line items
     const items = extractItems(text);
     _scannedItems = items;
@@ -1420,10 +1567,7 @@ document.getElementById('scan-input-file').addEventListener('change', e => {
   const file = e.target.files[0]; if (file) scanReceipt(file, false); e.target.value = '';
 });
 document.getElementById('nav-scan-btn').addEventListener('click', () => {
-  document.getElementById('nav-scan-input').click();
-});
-document.getElementById('nav-scan-btn-file').addEventListener('click', () => {
-  document.getElementById('nav-scan-input-file').click();
+  showScanOverlay(currentId, true);
 });
 document.getElementById('nav-scan-input').addEventListener('change', e => {
   const file = e.target.files[0]; if (file) scanReceipt(file, true); e.target.value = '';
@@ -1462,17 +1606,23 @@ closeModal = function() {
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(()=>{}); }
 
 // ── Scan overlay ──
-function showScanOverlay(tripTarget) {
+function showScanOverlay(tripTarget, fromNav) {
   const overlay = document.getElementById('scan-overlay');
   overlay.classList.add('visible');
 
   function handleScanFile(file) {
     overlay.classList.remove('visible');
-    showTrip(tripTarget);
-    setTimeout(() => {
+    if (fromNav) {
+      // Already in trip view — just open modal and scan
       openAdd('waer');
       setTimeout(() => { if (file) scanReceipt(file, false); }, 200);
-    }, 150);
+    } else {
+      showTrip(tripTarget);
+      setTimeout(() => {
+        openAdd('waer');
+        setTimeout(() => { if (file) scanReceipt(file, false); }, 200);
+      }, 150);
+    }
   }
 
   document.getElementById('overlay-cam-btn').onclick = () => {
@@ -1491,7 +1641,7 @@ function showScanOverlay(tripTarget) {
   };
   document.getElementById('overlay-cancel').onclick = () => {
     overlay.classList.remove('visible');
-    showTrip(tripTarget);
+    if (!fromNav && tripTarget) showTrip(tripTarget);
   };
 }
 
