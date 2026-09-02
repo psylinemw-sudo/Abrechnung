@@ -1,4 +1,4 @@
-const CACHE = 'crew-abrechnung-v13';
+const CACHE = 'crew-abrechnung-v14';
 const FILES = [
   './index.html',
   './manifest.json',
