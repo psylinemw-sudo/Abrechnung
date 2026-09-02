@@ -381,9 +381,11 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
     <button class="back-btn" id="back-btn">← Alle Reisen</button>
     <span class="trip-nav-spacer"></span>
     <button class="btn btn-ghost btn-sm" id="print-btn">🖨 Drucken / PDF</button>
-    <button class="btn btn-ghost btn-sm" id="nav-scan-btn" title="Quittung scannen">📷 Scannen</button>
+    <button class="btn btn-ghost btn-sm" id="nav-scan-btn" title="Kamera">📷 Kamera</button>
+    <button class="btn btn-ghost btn-sm" id="nav-scan-btn-file" title="Galerie / Datei">🖼 Galerie</button>
     <button class="btn btn-primary btn-sm" id="add-exp-top">+ Ausgabe</button>
-    <input type="file" id="nav-scan-input" accept="image/*" style="display:none">
+    <input type="file" id="nav-scan-input"      accept="image/*" capture="environment" style="display:none">
+    <input type="file" id="nav-scan-input-file" accept="image/*" style="display:none">
   </div>
 
   <div class="top-bar">
@@ -493,13 +495,15 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
         <label class="form-label">Betrag (leer = unbekannt)</label>
         <div style="display:flex;gap:8px;align-items:stretch">
           <input class="form-input" id="exp-total" type="number" step="0.01" placeholder="0.00" style="flex:1">
-          <button type="button" class="scan-btn" id="scan-btn" title="Quittung fotografieren">📷</button>
+          <button type="button" class="scan-btn" id="scan-btn-cam" title="Kamera öffnen">📷</button>
+          <button type="button" class="scan-btn" id="scan-btn-file" title="Foto aus Galerie / Datei" style="font-size:15px">🖼</button>
         </div>
         <div class="scan-status" id="scan-status">
           <div class="scan-spinner" id="scan-spinner"></div>
           <span id="scan-msg">Wird erkannt…</span>
         </div>
-        <input type="file" id="scan-input" accept="image/*" style="display:none">
+        <input type="file" id="scan-input-cam"  accept="image/*" capture="environment" style="display:none">
+        <input type="file" id="scan-input-file" accept="image/*" style="display:none">
       </div>
     </div>
     <div class="form-row">
@@ -1325,7 +1329,7 @@ async function loadTesseract() {
 }
 
 async function scanReceipt(file, fromNav) {
-  const btn = fromNav ? document.getElementById('nav-scan-btn') : document.getElementById('scan-btn');
+  const btn = fromNav ? document.getElementById('nav-scan-btn') : document.getElementById('scan-btn-cam');
   if (btn) btn.disabled = true;
   _scannedItems = [];
 
@@ -1360,16 +1364,28 @@ async function scanReceipt(file, fromNav) {
   }
 }
 
-document.getElementById('scan-btn').addEventListener('click', () => {
-  document.getElementById('scan-input').click();
+document.getElementById('scan-btn-cam').addEventListener('click', () => {
+  document.getElementById('scan-input-cam').click();
 });
-document.getElementById('scan-input').addEventListener('change', e => {
+document.getElementById('scan-btn-file').addEventListener('click', () => {
+  document.getElementById('scan-input-file').click();
+});
+document.getElementById('scan-input-cam').addEventListener('change', e => {
+  const file = e.target.files[0]; if (file) scanReceipt(file, false); e.target.value = '';
+});
+document.getElementById('scan-input-file').addEventListener('change', e => {
   const file = e.target.files[0]; if (file) scanReceipt(file, false); e.target.value = '';
 });
 document.getElementById('nav-scan-btn').addEventListener('click', () => {
   document.getElementById('nav-scan-input').click();
 });
+document.getElementById('nav-scan-btn-file').addEventListener('click', () => {
+  document.getElementById('nav-scan-input-file').click();
+});
 document.getElementById('nav-scan-input').addEventListener('change', e => {
+  const file = e.target.files[0]; if (file) scanReceipt(file, true); e.target.value = '';
+});
+document.getElementById('nav-scan-input-file').addEventListener('change', e => {
   const file = e.target.files[0]; if (file) scanReceipt(file, true); e.target.value = '';
 });
 
