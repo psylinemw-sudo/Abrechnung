@@ -1371,38 +1371,53 @@ function extractItems(text) {
     if (price <= 0 || price >= 5000 || name.length < 2) continue;
 
     let qty = 1;
+    let unitIsPrice = false; // true when the parsed price is a unit price, not total
 
-    // Format 1: "3x Cola" or "3× Cola" — quantity prefix
-    const qPre = name.match(/^(\d+)\s*[x×]\s+/i);
-    if (qPre && parseInt(qPre[1]) > 1) {
-      qty = parseInt(qPre[1]);
-      name = name.substring(qPre[0].length).trim();
+    // Format A: "Name - 3x - 4.50"  or  "Name - 3x - 4.50  total"
+    // Dash-separated: name · qty · unit_price (total on right may differ)
+    const dashFmt = name.match(/^(.+?)\s*-\s*(\d+)\s*[x×]\s*-\s*([0-9]+[.,][0-9]{2})\s*$/i);
+    if (dashFmt && parseInt(dashFmt[2]) > 1) {
+      qty  = parseInt(dashFmt[2]);
+      name = dashFmt[1].trim();
+      // unit price from the dash part; the line-end price is the total → use total (already in price)
+      // but if line-end price equals unit price, total = qty * unit
+      const unitP = parseFloat(dashFmt[3].replace(',', '.'));
+      if (Math.abs(price - unitP) < 0.02) {
+        // line price IS the unit price → compute total
+        unitIsPrice = true;
+      }
+      // else: line price is already the total, keep it
     } else {
-      // Format 2: "Cola 3x" or "Cola 3×" — quantity suffix in name → price is unit price
-      const qSuf = name.match(/\s+(\d+)\s*[x×]\s*$/i);
-      if (qSuf && parseInt(qSuf[1]) > 1) {
-        qty = parseInt(qSuf[1]);
-        name = name.substring(0, name.length - qSuf[0].length).trim();
-        // price on the line is the unit price → total = qty * price
-        // (already parsed as price; multiply below after merge)
+      // Format B: "3x Cola" or "3× Cola" — quantity prefix
+      const qPre = name.match(/^(\d+)\s*[x×]\s+/i);
+      if (qPre && parseInt(qPre[1]) > 1) {
+        qty  = parseInt(qPre[1]);
+        name = name.substring(qPre[0].length).trim();
       } else {
-        // Format 3: "Cola   3   4.50" — lone integer before the price on same line
-        // Check if the text just before the price number is a small integer (qty)
-        const beforePrice = line.substring(0, line.lastIndexOf(m[0])).trim();
-        const qMid = beforePrice.match(/^(.*?)\s+(\d{1,2})\s*$/);
-        if (qMid && parseInt(qMid[2]) > 1 && parseInt(qMid[2]) <= 99) {
-          qty = parseInt(qMid[2]);
-          name = qMid[1].replace(/[\s.:]+$/, '').trim();
+        // Format C: "Cola 3x" or "Cola 3×" — quantity suffix → line price is unit price
+        const qSuf = name.match(/\s+(\d+)\s*[x×]\s*$/i);
+        if (qSuf && parseInt(qSuf[1]) > 1) {
+          qty  = parseInt(qSuf[1]);
+          name = name.substring(0, name.length - qSuf[0].length).trim();
+          unitIsPrice = true;
+        } else {
+          // Format D: "Cola   3   4.50" — lone integer column before price
+          const beforePrice = line.substring(0, line.lastIndexOf(m[0])).trim();
+          const qMid = beforePrice.match(/^(.*?)\s+(\d{1,2})\s*$/);
+          if (qMid && parseInt(qMid[2]) > 1 && parseInt(qMid[2]) <= 99) {
+            qty  = parseInt(qMid[2]);
+            name = qMid[1].replace(/[\s.:]+$/, '').trim();
+            unitIsPrice = true;
+          }
         }
       }
     }
 
-    // If qty was detected via suffix/mid, the OCR price is unit price → total = qty × unitPrice
-    if (qty > 1 && !qPre) {
-      raw.push({ name: name || `Position ${raw.length+1}`, price: Math.round(price * qty * 100) / 100, qty, persons: [] });
-    } else {
-      raw.push({ name: name || `Position ${raw.length+1}`, price, qty, persons: [] });
-    }
+    const totalPrice = (qty > 1 && unitIsPrice)
+      ? Math.round(price * qty * 100) / 100
+      : price;
+
+    raw.push({ name: name || `Position ${raw.length+1}`, price: totalPrice, qty, persons: [] });
   }
 
   // Merge duplicates (same name, same unit price within ±1 cent)
