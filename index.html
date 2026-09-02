@@ -249,6 +249,29 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
 .payonsite-group label { display: flex; align-items: center; gap: 7px; cursor: pointer; }
 .payonsite-group input { accent-color: #B8930A; }
 
+/* ── Receipt scan ── */
+.scan-btn {
+  flex-shrink:0; width:40px; height:40px; border-radius:8px;
+  border:1px solid #E0D8CE; background:#fff; cursor:pointer;
+  font-size:18px; display:flex; align-items:center; justify-content:center;
+  transition:border-color .12s, background .12s;
+}
+.scan-btn:hover { border-color:#C84828; background:#FFF5F3; }
+.scan-btn:disabled { opacity:.4; cursor:default; }
+.scan-status {
+  display:none; margin-top:5px; font-family:Arial,sans-serif;
+  font-size:10px; color:#888; align-items:center; gap:6px;
+}
+.scan-status.visible { display:flex; }
+.scan-spinner {
+  width:12px; height:12px; border:2px solid #E0D8CE;
+  border-top-color:#C84828; border-radius:50%;
+  animation:spin .7s linear infinite; flex-shrink:0;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+.scan-result-ok  { color:#2A6A3A; }
+.scan-result-err { color:#882A20; }
+
 /* Delete trip button */
 .delete-trip-btn {
   background: none; border: none; font-family: Arial, sans-serif; font-size: 10px;
@@ -452,7 +475,15 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
       </div>
       <div class="form-group">
         <label class="form-label">Betrag (leer = unbekannt)</label>
-        <input class="form-input" id="exp-total" type="number" step="0.01" placeholder="0.00">
+        <div style="display:flex;gap:8px;align-items:stretch">
+          <input class="form-input" id="exp-total" type="number" step="0.01" placeholder="0.00" style="flex:1">
+          <button type="button" class="scan-btn" id="scan-btn" title="Quittung fotografieren">📷</button>
+        </div>
+        <div class="scan-status" id="scan-status">
+          <div class="scan-spinner" id="scan-spinner"></div>
+          <span id="scan-msg">Wird erkannt…</span>
+        </div>
+        <input type="file" id="scan-input" accept="image/*" capture="environment" style="display:none">
       </div>
     </div>
     <div class="form-row">
@@ -1145,6 +1176,92 @@ document.getElementById('expense-modal').addEventListener('click',e=>{if(e.targe
 document.getElementById('trip-title').addEventListener('blur',function(){D.trip=this.textContent.trim();save();renderHome();});
 document.getElementById('trip-subtitle').addEventListener('blur',function(){D.subtitle=this.textContent.trim();save();});
 document.getElementById('currency-sel').addEventListener('change',function(){D.currency=this.value;save();renderExpenses();renderSettlement();});
+
+// ═══════════════════════════════════════════════════════════
+// RECEIPT SCAN (Tesseract.js)
+// ═══════════════════════════════════════════════════════════
+let tesseractReady = false;
+
+function scanStatus(msg, type) {
+  const el  = document.getElementById('scan-status');
+  const sp  = document.getElementById('scan-spinner');
+  const txt = document.getElementById('scan-msg');
+  el.className = 'scan-status visible';
+  txt.textContent = msg;
+  txt.className = type === 'ok' ? 'scan-result-ok' : type === 'err' ? 'scan-result-err' : '';
+  sp.style.display = type === 'loading' ? '' : 'none';
+}
+function scanHide() {
+  document.getElementById('scan-status').className = 'scan-status';
+}
+
+function extractAmount(text) {
+  // Strategy 1: keyword near amount (Total, Summe, Gesamt, Betrag, Rp., CHF, EUR)
+  const keywordRe = /(?:total|summe|gesamt|betrag|zu\s*bezahlen|rp\.?|chf|eur|usd|thb|idr|sgd)\s*[:.\s]*([0-9]{1,6}[.,][0-9]{2})/gi;
+  const candidates = [];
+  let m;
+  while ((m = keywordRe.exec(text)) !== null) {
+    const val = parseFloat(m[1].replace(',', '.'));
+    if (val > 0) candidates.push(val);
+  }
+  if (candidates.length) return Math.max(...candidates);
+
+  // Strategy 2: last number with two decimals on the page (often the total)
+  const allAmounts = [...text.matchAll(/\b([0-9]{1,6}[.,][0-9]{2})\b/g)]
+    .map(x => parseFloat(x[1].replace(',', '.')))
+    .filter(v => v > 0 && v < 100000);
+  if (allAmounts.length) return allAmounts[allAmounts.length - 1];
+
+  return null;
+}
+
+async function scanReceipt(file) {
+  const btn = document.getElementById('scan-btn');
+  btn.disabled = true;
+  scanStatus('Bild wird geladen…', 'loading');
+
+  try {
+    // Lazy-load Tesseract only when first needed
+    if (!window.Tesseract) {
+      scanStatus('Erkennungs-Engine lädt…', 'loading');
+      await new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+        s.onload = res; s.onerror = rej;
+        document.head.appendChild(s);
+      });
+    }
+
+    scanStatus('Quittung wird erkannt…', 'loading');
+    const { data: { text } } = await Tesseract.recognize(file, 'deu+eng', { logger: () => {} });
+
+    const amount = extractAmount(text);
+    if (amount !== null) {
+      document.getElementById('exp-total').value = amount.toFixed(2);
+      scanStatus(`✓ Betrag erkannt: ${amount.toFixed(2)} — bitte prüfen und ggf. korrigieren`, 'ok');
+    } else {
+      scanStatus('Kein Betrag erkannt — bitte manuell eingeben', 'err');
+    }
+  } catch(e) {
+    scanStatus('Fehler beim Scannen — bitte manuell eingeben', 'err');
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('scan-btn').addEventListener('click', () => {
+  document.getElementById('scan-input').click();
+});
+document.getElementById('scan-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (file) scanReceipt(file);
+  e.target.value = '';
+});
+
+// Hide scan status when modal closes
+const _origClose = closeModal;
+closeModal = function() { _origClose(); scanHide(); };
 
 // ═══════════════════════════════════════════════════════════
 // SERVICE WORKER + INIT
