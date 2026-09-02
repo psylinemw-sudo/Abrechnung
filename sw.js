@@ -1,9 +1,11 @@
-const CACHE = 'crew-abrechnung-v4';
+const CACHE = 'crew-abrechnung-v7';
 const FILES = [
   './index.html',
   './manifest.json',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './icon-add.png',
+  './icon-scan.png'
 ];
 
 self.addEventListener('install', e => {

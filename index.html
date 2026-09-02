@@ -272,6 +272,20 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
 .scan-result-ok  { color:#2A6A3A; }
 .scan-result-err { color:#882A20; }
 
+/* ── Itemized receipt ── */
+.itemize-toggle { display:flex; align-items:center; gap:7px; font-family:Arial,sans-serif; font-size:12px; color:#444; cursor:pointer; margin-top:6px; }
+.itemize-toggle input { accent-color:#C84828; cursor:pointer; }
+.items-list { margin-top:10px; border:1px solid #EDE8E2; border-radius:8px; overflow:hidden; }
+.item-row { padding:9px 12px; border-bottom:1px solid #F5F0EB; }
+.item-row:last-child { border-bottom:none; }
+.item-row-top { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px; }
+.item-row-name { font-family:Arial,sans-serif; font-size:12px; color:#333; flex:1; }
+.item-row-price { font-family:Arial,sans-serif; font-size:12px; font-weight:bold; color:#555; white-space:nowrap; }
+.item-persons { display:flex; flex-wrap:wrap; gap:4px; }
+.item-chip { padding:3px 10px; border:1px solid #E0D8CE; border-radius:12px; font-family:Arial,sans-serif; font-size:11px; color:#777; cursor:pointer; user-select:none; transition:all .1s; }
+.item-chip.active { background:#E8F5EC; border-color:#2A6A3A; color:#2A6A3A; font-weight:bold; }
+.items-note { font-family:Arial,sans-serif; font-size:10px; color:#AAA; margin-top:8px; }
+
 /* Delete trip button */
 .delete-trip-btn {
   background: none; border: none; font-family: Arial, sans-serif; font-size: 10px;
@@ -367,7 +381,9 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
     <button class="back-btn" id="back-btn">← Alle Reisen</button>
     <span class="trip-nav-spacer"></span>
     <button class="btn btn-ghost btn-sm" id="print-btn">🖨 Drucken / PDF</button>
+    <button class="btn btn-ghost btn-sm" id="nav-scan-btn" title="Quittung scannen">📷 Scannen</button>
     <button class="btn btn-primary btn-sm" id="add-exp-top">+ Ausgabe</button>
+    <input type="file" id="nav-scan-input" accept="image/*" style="display:none">
   </div>
 
   <div class="top-bar">
@@ -483,7 +499,7 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
           <div class="scan-spinner" id="scan-spinner"></div>
           <span id="scan-msg">Wird erkannt…</span>
         </div>
-        <input type="file" id="scan-input" accept="image/*" capture="environment" style="display:none">
+        <input type="file" id="scan-input" accept="image/*" style="display:none">
       </div>
     </div>
     <div class="form-row">
@@ -499,6 +515,13 @@ body { font-family: 'Georgia', serif; background: #F0EBE3; color: #1A1A1A; min-h
     <div class="form-group">
       <label class="form-label">Teilnehmer</label>
       <div class="part-checks" id="exp-participants"></div>
+    </div>
+    <div class="form-group" id="itemize-group" style="display:none">
+      <label class="itemize-toggle">
+        <input type="checkbox" id="exp-itemize"> Positionen einzeln aufteilen (wer hat was bestellt?)
+      </label>
+      <div class="items-list" id="items-list" style="display:none"></div>
+      <div class="items-note" id="items-note" style="display:none"></div>
     </div>
     <div class="form-group">
       <label class="settled-label">
@@ -555,36 +578,7 @@ function clone(o) { return JSON.parse(JSON.stringify(o)); }
       idx.push({ id, name: d.trip || 'Sulawesi 26', subtitle: d.subtitle || '', savedAt: d.savedAt || new Date().toISOString() });
     } catch(e) {}
   } else {
-    // Fresh install: create default Sulawesi trip
-    const id = genId();
-    const d = {
-      trip: 'Sulawesi 26', subtitle: 'Oktober 2026', currency: 'CHF',
-      persons: ['Patrick Kraus', 'Adina Stern', 'Anna-Lisa Schmalz', 'Sarah Rätz', 'Manuel Wälti'],
-      expenses: [
-        { id:'e1', title:'Zürich – Singapur – Manado', type:'Flug', phase:'vor', payOnSite:false,
-          paidBy:'Manuel Wälti', total:2721, note:"1'975 + 746",
-          participants:['Patrick Kraus','Anna-Lisa Schmalz','Sarah Rätz','Manuel Wälti'],
-          payments:{'Patrick Kraus':680,'Anna-Lisa Schmalz':680,'Sarah Rätz':680}, settled:true },
-        { id:'e2', title:'Bangkok – Zürich', type:'Flug', phase:'vor', payOnSite:false,
-          paidBy:'Manuel Wälti', total:3144, note:'',
-          participants:['Patrick Kraus','Adina Stern','Anna-Lisa Schmalz','Sarah Rätz','Manuel Wälti'],
-          payments:{'Patrick Kraus':600,'Adina Stern':600,'Anna-Lisa Schmalz':600,'Sarah Rätz':600}, settled:false },
-        { id:'e3', title:'Manado – Gorontalo', type:'Flug', phase:'vor', payOnSite:false,
-          paidBy:'Manuel Wälti', total:455, note:'',
-          participants:['Patrick Kraus','Adina Stern','Anna-Lisa Schmalz','Sarah Rätz','Manuel Wälti'],
-          payments:{}, settled:false },
-        { id:'e4', title:'Hotel Singapur', type:'Unterkunft', phase:'vor', payOnSite:true,
-          paidBy:'Anna-Lisa Schmalz', total:null, note:'Bezahlung vor Ort',
-          participants:['Patrick Kraus','Anna-Lisa Schmalz','Sarah Rätz','Manuel Wälti'],
-          payments:{}, settled:false },
-        { id:'e5', title:'Hotel Togean', type:'Unterkunft', phase:'vor', payOnSite:true,
-          paidBy:'Patrick Kraus', total:null, note:'Bezahlung vor Ort',
-          participants:['Patrick Kraus','Adina Stern','Anna-Lisa Schmalz','Sarah Rätz','Manuel Wälti'],
-          payments:{}, settled:false }
-      ]
-    };
-    saveTripData(id, d);
-    idx.push({ id, name: 'Sulawesi 26', subtitle: 'Oktober 2026', savedAt: new Date().toISOString() });
+    // Fresh install: start empty
   }
   saveIndex(idx);
 })();
@@ -613,6 +607,7 @@ function showTrip(id) {
   if (!data) return;
   currentId = id;
   D = data;
+  localStorage.setItem('abrechnung_last_trip', id);  // remember for shortcuts
   document.getElementById('home-view').style.display = 'none';
   document.getElementById('trip-view').style.display = 'block';
   document.title = D.trip || 'Abrechnung';
@@ -804,6 +799,8 @@ function removePerson(name){
 
 function buildExpCard(exp,openIds){
   const st=expStatus(exp),n=(exp.participants||[]).length,c=cur();
+  // Per-person share: use customSplits if present, else equal split
+  const shareMap = exp.customSplits && Object.keys(exp.customSplits).length ? exp.customSplits : null;
   const share=(exp.total!=null&&n>0)?exp.total/n:null;
   const card=document.createElement('div'); card.className=`expense-card ${st}`;
   const hdr=document.createElement('div'); hdr.className='exp-header';
@@ -845,7 +842,8 @@ function buildExpCard(exp,openIds){
     const tn=document.createElement('td'); tn.textContent=person;
     if(isPayer){const tg=document.createElement('span');tg.className='payer-tag';tg.textContent='zahler';tn.appendChild(tg);}
     const ts=document.createElement('td'); ts.className='td-r'; ts.style.color='#888';
-    ts.textContent=share!=null?fmtN(share):'?';
+    const personShare = shareMap ? (shareMap[person]!=null?shareMap[person]:0) : share;
+    ts.textContent=personShare!=null?fmtN(personShare):'?';
     const tp=document.createElement('td'); tp.className='td-r';
     const tst=document.createElement('td'); tst.className='td-r'; tst.style.fontWeight='bold'; tst.style.fontSize='11px';
     if(isPayer){
@@ -894,9 +892,18 @@ function calcBal(expenses){
   persons.forEach(p=>{bal[p]=0;});
   expenses.forEach(exp=>{
     if(exp.total==null||!(exp.participants||[]).length)return;
-    const n=exp.participants.length,share=exp.total/n;
+    const n=exp.participants.length;
     if(bal[exp.paidBy]!=null)bal[exp.paidBy]+=exp.total;
-    exp.participants.forEach(p=>{if(bal[p]!=null)bal[p]-=share;});
+    if(exp.customSplits && Object.keys(exp.customSplits).length){
+      // Use individual splits per person
+      exp.participants.forEach(p=>{
+        const share=exp.customSplits[p]||0;
+        if(bal[p]!=null)bal[p]-=share;
+      });
+    } else {
+      const share=exp.total/n;
+      exp.participants.forEach(p=>{if(bal[p]!=null)bal[p]-=share;});
+    }
     Object.entries(exp.payments||{}).forEach(([p,amt])=>{if(!amt)return;if(bal[p]!=null)bal[p]+=Number(amt);if(bal[exp.paidBy]!=null)bal[exp.paidBy]-=Number(amt);});
   });
   return bal;
@@ -1101,6 +1108,11 @@ function saveExpense(){
   const tv=document.getElementById('exp-total').value;
   const total=tv!==''?parseFloat(tv):null;
   const existing=editingId?(D.expenses||[]).find(e=>e.id===editingId):null;
+  // Custom splits from itemized scan
+  let customSplits = null;
+  if (document.getElementById('exp-itemize').checked && _scannedItems.length) {
+    customSplits = calcCustomSplits();
+  }
   const exp={
     id:editingId||('e'+Date.now()),title,
     type:document.getElementById('exp-type').value,
@@ -1110,6 +1122,7 @@ function saveExpense(){
     settled:document.getElementById('exp-settled').checked,
     phase:document.getElementById('phase-btn-waer').classList.contains('active')?'waer':'vor',
     payOnSite:document.getElementById('exp-payonsite').checked,
+    customSplits: customSplits || (existing ? (existing.customSplits||null) : null),
   };
   if(editingId){const idx=D.expenses.findIndex(e=>e.id===editingId);if(idx!==-1)D.expenses[idx]=exp;}
   else D.expenses=[...(D.expenses||[]),exp];
@@ -1180,7 +1193,7 @@ document.getElementById('currency-sel').addEventListener('change',function(){D.c
 // ═══════════════════════════════════════════════════════════
 // RECEIPT SCAN (Tesseract.js)
 // ═══════════════════════════════════════════════════════════
-let tesseractReady = false;
+let _scannedItems = [];  // items extracted from last scan
 
 function scanStatus(msg, type) {
   const el  = document.getElementById('scan-status');
@@ -1196,7 +1209,6 @@ function scanHide() {
 }
 
 function extractAmount(text) {
-  // Strategy 1: keyword near amount (Total, Summe, Gesamt, Betrag, Rp., CHF, EUR)
   const keywordRe = /(?:total|summe|gesamt|betrag|zu\s*bezahlen|rp\.?|chf|eur|usd|thb|idr|sgd)\s*[:.\s]*([0-9]{1,6}[.,][0-9]{2})/gi;
   const candidates = [];
   let m;
@@ -1205,48 +1217,146 @@ function extractAmount(text) {
     if (val > 0) candidates.push(val);
   }
   if (candidates.length) return Math.max(...candidates);
-
-  // Strategy 2: last number with two decimals on the page (often the total)
   const allAmounts = [...text.matchAll(/\b([0-9]{1,6}[.,][0-9]{2})\b/g)]
     .map(x => parseFloat(x[1].replace(',', '.')))
     .filter(v => v > 0 && v < 100000);
   if (allAmounts.length) return allAmounts[allAmounts.length - 1];
-
   return null;
 }
 
-async function scanReceipt(file) {
-  const btn = document.getElementById('scan-btn');
-  btn.disabled = true;
-  scanStatus('Bild wird geladen…', 'loading');
+function extractItems(text) {
+  const skipRe = /total|summe|mwst|mehrwert|steuer|gesamt|zwischentotal|subtotal|rabatt|discount|trinkgeld|service/i;
+  const priceRe = /([0-9]{1,5}[.,][0-9]{2})\s*$/;
+  const items = [];
+  for (const line of text.split('\n').map(l => l.trim()).filter(Boolean)) {
+    const m = line.match(priceRe);
+    if (!m) continue;
+    if (skipRe.test(line)) continue;
+    const price = parseFloat(m[1].replace(',', '.'));
+    const name  = line.substring(0, line.lastIndexOf(m[0])).replace(/[\s.:]+$/, '').trim();
+    if (price <= 0 || price >= 5000 || name.length < 2) continue;
+    items.push({ name: name || `Position ${items.length+1}`, price, persons: [] });
+  }
+  return items;
+}
 
-  try {
-    // Lazy-load Tesseract only when first needed
-    if (!window.Tesseract) {
-      scanStatus('Erkennungs-Engine lädt…', 'loading');
-      await new Promise((res, rej) => {
-        const s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
-        s.onload = res; s.onerror = rej;
-        document.head.appendChild(s);
+function buildItemsUI(items) {
+  const list = document.getElementById('items-list');
+  const note = document.getElementById('items-note');
+  list.innerHTML = '';
+  if (!items.length) { list.style.display='none'; note.style.display='none'; return; }
+
+  const persons = D ? (D.persons || []) : [];
+  items.forEach((item, idx) => {
+    const row = document.createElement('div'); row.className = 'item-row';
+    const top = document.createElement('div'); top.className = 'item-row-top';
+    const nm  = document.createElement('div'); nm.className = 'item-row-name'; nm.textContent = item.name;
+    const pr  = document.createElement('div'); pr.className = 'item-row-price';
+    pr.textContent = `${cur()} ${fmtN(item.price)}`;
+    top.appendChild(nm); top.appendChild(pr); row.appendChild(top);
+
+    const chips = document.createElement('div'); chips.className = 'item-persons';
+    persons.forEach(p => {
+      const chip = document.createElement('div');
+      chip.className = 'item-chip' + (item.persons.includes(p) ? ' active' : '');
+      chip.textContent = p.split(' ')[0]; // first name only
+      chip.dataset.full = p;
+      chip.addEventListener('click', () => {
+        chip.classList.toggle('active');
+        const full = chip.dataset.full;
+        if (chip.classList.contains('active')) {
+          if (!_scannedItems[idx].persons.includes(full)) _scannedItems[idx].persons.push(full);
+        } else {
+          _scannedItems[idx].persons = _scannedItems[idx].persons.filter(x => x !== full);
+        }
+        updateItemSplitNote();
       });
-    }
+      chips.appendChild(chip);
+    });
+    row.appendChild(chips);
+    list.appendChild(row);
+  });
 
+  list.style.display = '';
+  note.style.display = '';
+  note.textContent = 'Tippe auf Namen um zuzuweisen. Nicht zugewiesene Positionen werden gleich aufgeteilt.';
+  updateItemSplitNote();
+}
+
+function updateItemSplitNote() {
+  const note = document.getElementById('items-note');
+  if (!_scannedItems.length) return;
+  const unassigned = _scannedItems.filter(i => !i.persons.length);
+  if (unassigned.length) {
+    note.textContent = `${unassigned.length} Position(en) noch nicht zugewiesen — werden gleich aufgeteilt.`;
+  } else {
+    note.textContent = '✓ Alle Positionen zugewiesen.';
+    note.style.color = '#2A6A3A';
+  }
+}
+
+function calcCustomSplits() {
+  if (!_scannedItems.length) return null;
+  const participants = [...document.querySelectorAll('#exp-participants .part-chip.active')].map(c => c.dataset.person);
+  if (!participants.length) return null;
+
+  const splits = {};
+  participants.forEach(p => { splits[p] = 0; });
+
+  _scannedItems.forEach(item => {
+    const assigned = item.persons.length ? item.persons.filter(p => participants.includes(p)) : participants;
+    const share = item.price / (assigned.length || participants.length);
+    (assigned.length ? assigned : participants).forEach(p => { if (splits[p] != null) splits[p] += share; });
+  });
+
+  // Round to 2 decimals
+  Object.keys(splits).forEach(p => { splits[p] = Math.round(splits[p] * 100) / 100; });
+  return splits;
+}
+
+async function loadTesseract() {
+  if (window.Tesseract) return;
+  await new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+async function scanReceipt(file, fromNav) {
+  const btn = fromNav ? document.getElementById('nav-scan-btn') : document.getElementById('scan-btn');
+  if (btn) btn.disabled = true;
+  _scannedItems = [];
+
+  // If triggered from nav, open the add modal first
+  if (fromNav) { openAdd('waer'); await new Promise(r => setTimeout(r, 80)); }
+
+  scanStatus('Erkennungs-Engine lädt…', 'loading');
+  try {
+    await loadTesseract();
     scanStatus('Quittung wird erkannt…', 'loading');
     const { data: { text } } = await Tesseract.recognize(file, 'deu+eng', { logger: () => {} });
 
     const amount = extractAmount(text);
     if (amount !== null) {
       document.getElementById('exp-total').value = amount.toFixed(2);
-      scanStatus(`✓ Betrag erkannt: ${amount.toFixed(2)} — bitte prüfen und ggf. korrigieren`, 'ok');
+      scanStatus(`✓ Betrag erkannt: ${amount.toFixed(2)} — bitte prüfen`, 'ok');
     } else {
       scanStatus('Kein Betrag erkannt — bitte manuell eingeben', 'err');
+    }
+
+    // Extract line items
+    const items = extractItems(text);
+    _scannedItems = items;
+    if (items.length) {
+      document.getElementById('itemize-group').style.display = '';
     }
   } catch(e) {
     scanStatus('Fehler beim Scannen — bitte manuell eingeben', 'err');
     console.error(e);
   } finally {
-    btn.disabled = false;
+    if (btn) btn.disabled = false;
   }
 }
 
@@ -1254,21 +1364,71 @@ document.getElementById('scan-btn').addEventListener('click', () => {
   document.getElementById('scan-input').click();
 });
 document.getElementById('scan-input').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (file) scanReceipt(file);
-  e.target.value = '';
+  const file = e.target.files[0]; if (file) scanReceipt(file, false); e.target.value = '';
+});
+document.getElementById('nav-scan-btn').addEventListener('click', () => {
+  document.getElementById('nav-scan-input').click();
+});
+document.getElementById('nav-scan-input').addEventListener('change', e => {
+  const file = e.target.files[0]; if (file) scanReceipt(file, true); e.target.value = '';
 });
 
-// Hide scan status when modal closes
+// Toggle items list visibility
+document.getElementById('exp-itemize').addEventListener('change', function() {
+  const list = document.getElementById('items-list');
+  const note = document.getElementById('items-note');
+  if (this.checked && _scannedItems.length) {
+    buildItemsUI(_scannedItems);
+  } else {
+    list.style.display = 'none';
+    note.style.display = 'none';
+  }
+});
+
+// Hide scan status + items when modal closes
 const _origClose = closeModal;
-closeModal = function() { _origClose(); scanHide(); };
+closeModal = function() {
+  _origClose();
+  scanHide();
+  _scannedItems = [];
+  document.getElementById('itemize-group').style.display = 'none';
+  document.getElementById('items-list').style.display = 'none';
+  document.getElementById('items-note').style.display = 'none';
+  document.getElementById('exp-itemize').checked = false;
+};
 
 // ═══════════════════════════════════════════════════════════
 // SERVICE WORKER + INIT
 // ═══════════════════════════════════════════════════════════
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(()=>{}); }
 
-showHome();
+// ── Launch shortcuts (?action=scan / ?action=add) ──
+(function handleShortcut() {
+  const action = new URLSearchParams(window.location.search).get('action');
+  if (!action) { showHome(); return; }
+
+  // Find best trip to open: last used, or first in index
+  const lastId = localStorage.getItem('abrechnung_last_trip');
+  const idx    = loadIndex() || [];
+  const target = (lastId && idx.find(t => t.id === lastId))
+                 ? lastId
+                 : (idx.length ? idx[idx.length - 1].id : null);
+
+  if (!target) { showHome(); return; }
+
+  showHome();              // render home briefly (sets up state)
+  showTrip(target);        // go into trip
+
+  // Delay action until DOM is ready
+  setTimeout(() => {
+    if (action === 'add') {
+      openAdd('waer');
+    } else if (action === 'scan') {
+      openAdd('waer');
+      setTimeout(() => document.getElementById('nav-scan-input').click(), 200);
+    }
+  }, 150);
+})();
 </script>
 </body>
 </html>

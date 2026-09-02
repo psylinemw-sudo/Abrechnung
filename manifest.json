@@ -19,5 +19,21 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Quittung scannen",
+      "short_name": "Scannen",
+      "description": "Direkt eine Quittung fotografieren",
+      "url": "./index.html?action=scan",
+      "icons": [{ "src": "icon-scan.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Ausgabe hinzufügen",
+      "short_name": "+ Ausgabe",
+      "description": "Neue Ausgabe erfassen",
+      "url": "./index.html?action=add",
+      "icons": [{ "src": "icon-add.png", "sizes": "96x96", "type": "image/png" }]
+    }
   ]
 }
