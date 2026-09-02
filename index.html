@@ -1225,17 +1225,17 @@ document.getElementById('print-btn').addEventListener('click',()=>{
 
   // Gather expenses per phase
   function expRows(list) {
-    if (!list.length) return '<tr><td colspan="5" style="color:#aaa;font-size:11px;padding:6px 0">Keine Einträge</td></tr>';
+    if (!list.length) return '<tr><td colspan="7" style="color:#aaa;font-size:11px;padding:6px 0">Keine Einträge</td></tr>';
     return list.map(e => {
-      const share = e.participants && e.participants.length ? (e.total||0)/e.participants.length : 0;
       const status = e.settled ? '✓' : (e.total==null ? '?' : '○');
       return `<tr>
-        <td>${e.date||''}</td>
-        <td>${e.desc||''}</td>
+        <td style="color:#aaa;white-space:nowrap">${e.date||''}</td>
+        <td style="font-weight:bold">${e.title||e.desc||''}</td>
+        <td style="color:#888">${e.type||''}</td>
         <td>${e.paidBy||''}</td>
-        <td style="text-align:right">${c} ${fmtN(e.total||0)}</td>
-        <td>${(e.participants||[]).join(', ')}</td>
-        <td style="text-align:center">${status}</td>
+        <td style="text-align:right;font-weight:bold">${e.total!=null ? c+' '+fmtN(e.total) : '–'}</td>
+        <td style="color:#888">${(e.participants||[]).join(', ')}</td>
+        <td style="text-align:center;color:${e.settled?'#2A6A3A':'#888'}">${status}</td>
       </tr>`;
     }).join('');
   }
@@ -1244,30 +1244,78 @@ document.getElementById('print-btn').addEventListener('click',()=>{
   const vor  = all.filter(e=>(e.phase||'vor')!=='waer'&&!e.payOnSite);
   const waer = all.filter(e=>e.phase==='waer'||e.payOnSite);
 
-  // Balance
-  const bal = calcBal(all);
-  const balRows = Object.entries(bal).map(([p,b])=>`<tr><td>${p}</td><td style="text-align:right;font-weight:bold;color:${b>=0?'#2A6A3A':'#882A20'}">${c} ${b>=0?'+':''}${fmtN(b)}</td></tr>`).join('');
+  // Balance + transfers
+  const bal   = calcBal(all);
+  const debts = simplifyDebts(bal);
+  const totalAll = all.reduce((s,e)=>s+(e.total||0),0);
+
+  const balRows = Object.entries(bal).map(([p,b]) => {
+    const color = b >= 0 ? '#2A6A3A' : '#882A20';
+    const pct   = totalAll > 0 ? Math.abs(b) / totalAll * 100 : 0;
+    const bar   = `<div style="height:6px;background:#f0f0f0;border-radius:3px;overflow:hidden;margin-top:4px"><div style="height:100%;width:${pct.toFixed(1)}%;background:${color};border-radius:3px"></div></div>`;
+    return `<tr>
+      <td style="font-weight:bold">${p}</td>
+      <td style="text-align:right;font-weight:bold;color:${color}">${c} ${b>=0?'+':''}${fmtN(b)}</td>
+      <td style="width:180px;padding-left:12px">${bar}</td>
+    </tr>`;
+  }).join('');
+
+  const transferRows = debts.length
+    ? debts.map(d=>`<tr>
+        <td style="color:#882A20;font-weight:bold">${d.from}</td>
+        <td style="color:#aaa;text-align:center">→</td>
+        <td style="color:#2A6A3A;font-weight:bold">${d.to}</td>
+        <td style="text-align:right;font-weight:bold">${c} ${fmtN(d.amount)}</td>
+      </tr>`).join('')
+    : `<tr><td colspan="4" style="color:#2A6A3A">✓ Alle Ausgaben sind ausgeglichen</td></tr>`;
 
   const html = `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">
   <title>${title}</title>
   <style>
+    *{box-sizing:border-box}
     body{font-family:Arial,sans-serif;font-size:12px;color:#222;max-width:900px;margin:0 auto;padding:32px 24px}
     h1{font-family:Georgia,serif;font-size:28px;font-weight:normal;margin-bottom:4px}
     h2{font-family:Georgia,serif;font-size:16px;font-weight:normal;margin:24px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}
     table{width:100%;border-collapse:collapse;margin-bottom:16px}
     th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#999;border-bottom:1px solid #eee;padding:4px 6px}
-    td{padding:5px 6px;border-bottom:1px solid #f5f5f5;vertical-align:top}
+    td{padding:5px 6px;border-bottom:1px solid #f5f5f5;vertical-align:middle}
     .subtitle{font-size:11px;color:#aaa;letter-spacing:.1em;text-transform:uppercase;margin-bottom:24px}
-    @media print{@page{margin:1.5cm}}
+    .page-break{page-break-before:always;padding-top:32px}
+    .summary-box{background:#f8f8f8;border:1px solid #eee;border-radius:8px;padding:16px 20px;margin-bottom:20px;display:flex;gap:32px;flex-wrap:wrap}
+    .summary-item{font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.08em}
+    .summary-value{font-size:20px;font-weight:bold;color:#222;margin-top:2px}
+    @media print{@page{margin:1.5cm}.page-break{page-break-before:always}}
   </style></head><body>
+
   <h1>${title}</h1>
-  <div class="subtitle">${new Date().toLocaleDateString('de-CH')}</div>
+  <div class="subtitle">${new Date().toLocaleDateString('de-CH')} · Erstellt mit Abrechnung App</div>
+
+  <div class="summary-box">
+    <div><div class="summary-item">Total Ausgaben</div><div class="summary-value">${c} ${fmtN(totalAll)}</div></div>
+    <div><div class="summary-item">Anzahl Einträge</div><div class="summary-value">${all.length}</div></div>
+    <div><div class="summary-item">Teilnehmer</div><div class="summary-value">${(D.persons||[]).join(', ')}</div></div>
+  </div>
+
   <h2>Vor der Reise</h2>
-  <table><tr><th>Datum</th><th>Beschreibung</th><th>Bezahlt von</th><th style="text-align:right">Betrag</th><th>Teilnehmer</th><th>Status</th></tr>${expRows(vor)}</table>
+  <table><tr><th>Datum</th><th>Titel</th><th>Typ</th><th>Bezahlt von</th><th style="text-align:right">Betrag</th><th>Teilnehmer</th><th>Status</th></tr>${expRows(vor)}</table>
+
   <h2>Während der Reise</h2>
-  <table><tr><th>Datum</th><th>Beschreibung</th><th>Bezahlt von</th><th style="text-align:right">Betrag</th><th>Teilnehmer</th><th>Status</th></tr>${expRows(waer)}</table>
-  <h2>Bilanz</h2>
-  <table><tr><th>Person</th><th style="text-align:right">Saldo</th></tr>${balRows}</table>
+  <table><tr><th>Datum</th><th>Titel</th><th>Typ</th><th>Bezahlt von</th><th style="text-align:right">Betrag</th><th>Teilnehmer</th><th>Status</th></tr>${expRows(waer)}</table>
+
+  <div class="page-break">
+    <h1>${title}</h1>
+    <div class="subtitle">Abrechnung · ${new Date().toLocaleDateString('de-CH')}</div>
+
+    <h2>Saldo pro Person</h2>
+    <table><tr><th>Person</th><th style="text-align:right">Saldo</th><th></th></tr>${balRows}</table>
+
+    <h2>Wer zahlt wem</h2>
+    <table>
+      <tr><th>Von</th><th></th><th>An</th><th style="text-align:right">Betrag</th></tr>
+      ${transferRows}
+    </table>
+  </div>
+
   <script>window.onload=()=>{window.print();}<\/script>
   </body></html>`;
 
@@ -1368,82 +1416,90 @@ function extractReceiptType(text) {
 }
 
 function extractItems(text) {
-  const skipRe = /total|summe|mwst|mehrwert|steuer|gesamt|zwischentotal|subtotal|rabatt|discount|trinkgeld|service/i;
-  const priceRe = /([0-9]{1,5}[.,][0-9]{2})\s*$/;
-  // Detects leading quantity: "3x", "2 x", "3×", "3 Stk", "2St"
-  const qtyRe   = /^(\d+)\s*[x×xX]?\s*(?:stk|st\.?)?\s*/i;
-  const raw = [];
+  // Lines to skip
+  const skipRe = /^(total|summe|mwst|mehrwert|steuer|gesamt|zwischentotal|subtotal|rabatt|discount|trinkgeld|service|rückgabe|retour|bezahlt|bar |change|datum|tisch|bon |kasse|tel\.|bedien|uhr|quittung)/i;
+  const decRe  = /[0-9]{1,5}[.,][0-9]{2}/g;
+  const raw    = [];
 
-  for (const line of text.split('\n').map(l => l.trim()).filter(Boolean)) {
-    const m = line.match(priceRe);
-    if (!m) continue;
+  for (const rawLine of text.split('\n')) {
+    const line = rawLine.trim();
+    if (!line || line.length < 3) continue;
     if (skipRe.test(line)) continue;
-    const price = parseFloat(m[1].replace(',', '.'));
-    let name = line.substring(0, line.lastIndexOf(m[0])).replace(/[\s.:]+$/, '').trim();
-    if (price <= 0 || price >= 5000 || name.length < 2) continue;
 
-    let qty = 1;
-    let unitIsPrice = false; // true when the parsed price is a unit price, not total
+    // All decimal numbers on this line
+    const nums = [...line.matchAll(decRe)].map(m => ({
+      val: parseFloat(m[0].replace(',', '.')),
+      start: m.index,
+      end: m.index + m[0].length
+    }));
+    if (!nums.length) continue;
 
-    // Format A: "Name - 3x - 4.50"  or  "Name - 3x - 4.50  total"
-    // Dash-separated: name · qty · unit_price (total on right may differ)
-    const dashFmt = name.match(/^(.+?)\s*-\s*(\d+)\s*[x×]\s*-\s*([0-9]+[.,][0-9]{2})\s*$/i);
-    if (dashFmt && parseInt(dashFmt[2]) > 1) {
-      qty  = parseInt(dashFmt[2]);
-      name = dashFmt[1].trim();
-      // unit price from the dash part; the line-end price is the total → use total (already in price)
-      // but if line-end price equals unit price, total = qty * unit
-      const unitP = parseFloat(dashFmt[3].replace(',', '.'));
-      if (Math.abs(price - unitP) < 0.02) {
-        // line price IS the unit price → compute total
-        unitIsPrice = true;
+    // Rightmost number = the line price (either unit or total)
+    const last      = nums[nums.length - 1];
+    const linePrice = last.val;
+    if (linePrice < 0.5 || linePrice >= 5000) continue;
+
+    // Text before the rightmost number (name + optional qty marker + optional embedded unit price)
+    const before = line.substring(0, last.start).replace(/[-–\s.,:]+$/, '').trim();
+    if (!before || before.length < 2) continue;
+    if (skipRe.test(before)) continue;
+
+    let qty = 1, name = before, totalPrice = linePrice;
+
+    // Look for "Nx" quantity marker anywhere in `before` (with optional surrounding dashes/spaces)
+    // Handles: "- 3x -", "3x", "3 x", "3×", "- 3X -", etc.
+    const qRe  = /([-–\s]*)(\d{1,2})\s*[x×X]([-–\s]*)/i;
+    const qm   = before.match(qRe);
+
+    if (qm && parseInt(qm[2]) > 1 && parseInt(qm[2]) <= 99) {
+      qty  = parseInt(qm[2]);
+      // Name = everything before the qty marker, stripped of trailing dashes/spaces
+      name = before.substring(0, qm.index + qm[1].length)
+                   .replace(/[-–\s.,:]+$/, '').trim();
+      if (name.length < 2) name = before.replace(qRe, '').replace(/[-–\s.,:]+/g, ' ').trim();
+
+      // Is there an embedded unit price AFTER the qty marker?
+      const afterQty    = before.substring(qm.index + qm[0].length);
+      const embeddedM   = afterQty.match(/([0-9]{1,5}[.,][0-9]{2})/);
+      if (embeddedM) {
+        const unitP = parseFloat(embeddedM[1].replace(',', '.'));
+        // If linePrice ≈ unitP → linePrice is unit price, multiply for total
+        if (Math.abs(linePrice - unitP) < 0.02) {
+          totalPrice = Math.round(linePrice * qty * 100) / 100;
+        }
+        // else linePrice is already the total (unitP × qty ≈ linePrice) → keep
+      } else {
+        // No embedded unit price AND only one number on line → linePrice is unit price
+        if (nums.length === 1) {
+          totalPrice = Math.round(linePrice * qty * 100) / 100;
+        }
+        // else: linePrice (rightmost) is total → keep
       }
-      // else: line price is already the total, keep it
     } else {
-      // Format B: "3x Cola" or "3× Cola" — quantity prefix
-      const qPre = name.match(/^(\d+)\s*[x×]\s+/i);
+      // No Nx in before → try prefix "3x Name"
+      const qPre = before.match(/^(\d{1,2})\s*[x×X]\s+/i);
       if (qPre && parseInt(qPre[1]) > 1) {
         qty  = parseInt(qPre[1]);
-        name = name.substring(qPre[0].length).trim();
-      } else {
-        // Format C: "Cola 3x" or "Cola 3×" — quantity suffix → line price is unit price
-        const qSuf = name.match(/\s+(\d+)\s*[x×]\s*$/i);
-        if (qSuf && parseInt(qSuf[1]) > 1) {
-          qty  = parseInt(qSuf[1]);
-          name = name.substring(0, name.length - qSuf[0].length).trim();
-          unitIsPrice = true;
-        } else {
-          // Format D: "Cola   3   4.50" — lone integer column before price
-          const beforePrice = line.substring(0, line.lastIndexOf(m[0])).trim();
-          const qMid = beforePrice.match(/^(.*?)\s+(\d{1,2})\s*$/);
-          if (qMid && parseInt(qMid[2]) > 1 && parseInt(qMid[2]) <= 99) {
-            qty  = parseInt(qMid[2]);
-            name = qMid[1].replace(/[\s.:]+$/, '').trim();
-            unitIsPrice = true;
-          }
-        }
+        name = before.substring(qPre[0].length).trim();
+        if (nums.length === 1) totalPrice = Math.round(linePrice * qty * 100) / 100;
       }
     }
 
-    const totalPrice = (qty > 1 && unitIsPrice)
-      ? Math.round(price * qty * 100) / 100
-      : price;
-
-    raw.push({ name: name || `Position ${raw.length+1}`, price: totalPrice, qty, persons: [] });
+    if (!name || name.length < 2) continue;
+    raw.push({ name, price: totalPrice, qty, persons: [] });
   }
 
-  // Merge duplicates (same name, same unit price within ±1 cent)
+  // Merge duplicate items (same name, same unit price ±2 ct)
   const merged = [];
   raw.forEach(item => {
-    const unitPrice = Math.round(item.price / item.qty * 100) / 100;
-    const existing = merged.find(e => {
-      const eu = Math.round(e.price / e.qty * 100) / 100;
-      return e.name.toLowerCase() === item.name.toLowerCase()
-          && Math.abs(eu - unitPrice) < 0.02;
-    });
-    if (existing) {
-      existing.qty += item.qty;
-      existing.price = Math.round((existing.price + item.price) * 100) / 100;
+    const uP = Math.round(item.price / item.qty * 100) / 100;
+    const ex = merged.find(e =>
+      e.name.toLowerCase() === item.name.toLowerCase() &&
+      Math.abs(Math.round(e.price / e.qty * 100) / 100 - uP) < 0.03
+    );
+    if (ex) {
+      ex.qty   += item.qty;
+      ex.price  = Math.round((ex.price + item.price) * 100) / 100;
     } else {
       merged.push({ ...item });
     }
